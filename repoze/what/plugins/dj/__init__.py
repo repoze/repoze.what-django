@@ -17,3 +17,8 @@ The :mod:`repoze.what` Django plugin.
 
 """
 
+from repoze.what.plugins.dj.middleware import RepozeWhatMiddleware
+
+
+__all__ = ("RepozeWhatMiddleware", )
+
