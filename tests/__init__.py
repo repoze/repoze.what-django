@@ -70,6 +70,11 @@ class Request(WSGIRequest):
 class User(object):
     def __init__(self, username, groups, permissions):
         self.username = username
+        self.groups = groups
+        self.permissions = permissions
+    
+    def get_group_permissions(self):
+        return ()
     
     def get_all_permissions(self):
         return self.permissions
@@ -81,7 +86,7 @@ class User(object):
 class AnonymousUser(User):
     
     def __init__(self):
-        super(AnonymousUser, self).__init__(None, None, None)
+        super(AnonymousUser, self).__init__(None, (), ())
     
     def is_authenticated(self):
         return False
