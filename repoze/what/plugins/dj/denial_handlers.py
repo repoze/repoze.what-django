@@ -21,12 +21,16 @@ def default_denial_handler(request, denial_reason):
     authentication routine to challenge the user however it wants -- Even
     replacing the 401 status code with something else.
     
+    If a ``denial_reason`` is set, it will be shown to the user.
+    
     """
     if request.user.is_authenticated():
         status = 403
     else:
         status = 401
-    request.user.message_set.create(denial_reason)
+    
+    if denial_reason:
+        request.user.message_set.create(denial_reason)
     
     return HttpResponse(status=status)
 

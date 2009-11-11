@@ -27,3 +27,10 @@ class TestDenialHandler(object):
         eq_(response.status_code, 403)
         eq_(len(req.user.message_set.messages), 1)
         eq_(req.user.message_set.messages[0], "What are you doing here?")
+    
+    def test_no_message_set(self):
+        """No message should be shown to the user if there's none set."""
+        req = Request({}, make_user(None))
+        response = default_denial_handler(req, None)
+        eq_(response.status_code, 401)
+        eq_(len(req.user.message_set.messages), 0)
