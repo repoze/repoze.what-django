@@ -25,6 +25,8 @@ from django.utils.importlib import import_module
 from repoze.what.middleware import setup_request
 from repoze.what.acl import ACLCollection
 
+from repoze.what.plugins.dj.denial_handlers import default_denial_handler
+
 __all__ = ("RepozeWhatMiddleware", )
 
 
@@ -100,7 +102,37 @@ class RepozeWhatMiddleware(object):
         request.environ = new_environ
     
     def process_view(self, request, view_func, view_args, view_kwargs):
-        pass
+        """
+        Check if authorization should be granted for this request or reject
+        access if not.
+        
+        This will also update the :mod:`repoze.what`'s ``named_args`` and
+        ``positional_args`` keys in the WGSI environment.
+        
+        """
+        authz_decision = self.acl_collection.decide_authorization(request.environ,
+                                                                  view_func)
+        if authz_decision is None:
+            _LOGGER.info("No authorization decision made on %s",
+                         request.environ['PATH_INFO'])
+        elif authz_decision.allow:
+            _LOGGER.info("Authorization granted on %s to %s",
+                         request.environ['PATH_INFO'], request.user)
+        
+        if authz_decision is None or authz_decision.allow:
+            return
+        
+        # We have to deny authorization.
+        
+        _LOGGER.warn("Authorization denied on %s to %s",
+                     request.environ['PATH_INFO'], request.user)
+        
+        if authz_decision.denial_handler is None:
+            _LOGGER.debug("No custom denial handler defined; using the default "
+                          "one")
+            authz_decision.denial_handler = default_denial_handler
+        
+        return authz_decision.denial_handler(request, authz_decision.message)
     
     def process_exception(self, request, exception):
         pass

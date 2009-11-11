@@ -59,6 +59,7 @@ class Request(WSGIRequest):
             }
         if user.is_authenticated():
             full_environ['REMOTE_USER'] = user.username
+        full_environ.update(environ)
         # We're done, let's save it:
         super(Request, self).__init__(full_environ)
         self.user = user

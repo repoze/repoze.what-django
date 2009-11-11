@@ -98,4 +98,4 @@ INSTALLED_APPS = (
     "tests.fixtures.sampledjango.unsecured_app",
 )
 
-GLOBAL_ACL_COLLECTION = ACLCollection(allow_by_default=False)
+GLOBAL_ACL_COLLECTION = ACLCollection()

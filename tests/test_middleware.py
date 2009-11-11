@@ -18,6 +18,7 @@ Tests for the Django middleware for :mod:`repoze.what`.
 """
 
 from nose.tools import eq_, ok_
+from django.http import HttpResponse
 
 from repoze.what.plugins.dj import RepozeWhatMiddleware
 
@@ -101,4 +102,66 @@ class TestCredentials(object):
         eq_(self.middleware.process_request(request), None)
 
 
-
+class TestAuthorizationEnforcement(object):
+    """Tests for the process_view() routine."""
+    
+    def setUp(self):
+        self.middleware = RepozeWhatMiddleware()
+        self.log_fixture = LoggingHandlerFixture()
+    
+    def tearDown(self):
+        self.log_fixture.undo()
+    
+    def test_no_authz_decision_made(self):
+        """Nothing must be done if no decision was made."""
+        environ = {'PATH_INFO': "/app2/nothing"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        eq_(response, None)
+        eq_(len(self.log_fixture.handler.messages['info']), 1)
+        eq_(self.log_fixture.handler.messages['info'][0],
+            "No authorization decision made on /app2/nothing")
+    
+    def test_authz_granted(self):
+        """When authorization is granted nothing must be done."""
+        environ = {'PATH_INFO': "/app1/blog"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        eq_(response, None)
+        eq_(len(self.log_fixture.handler.messages['info']), 1)
+        eq_(self.log_fixture.handler.messages['info'][0],
+            "Authorization granted on /app1/blog to %s" % repr(request.user))
+    
+    def test_authorization_denied_without_custom_denial_handler(self):
+        """
+        When authorization is denied without a custom denial handler, the
+        default one must be user.
+        
+        """
+        environ = {'PATH_INFO': "/app2/secret"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        ok_(isinstance(response, HttpResponse))
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['warning']), 1)
+        eq_(self.log_fixture.handler.messages['warning'][0],
+            "Authorization denied on /app2/secret to %s" % repr(request.user))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "No custom denial handler defined; using the default one")
+    
+    def test_authorization_denied_with_custom_denial_handler(self):
+        """
+        Authorization must be denied with a custom denial handler, if available.
+        
+        """
+        environ = {'PATH_INFO': "/app1/admin"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        eq_(response, "No! Get out!")
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['warning']), 1)
+        eq_(self.log_fixture.handler.messages['warning'][0],
+            "Authorization denied on /app1/admin to %s" % repr(request.user))
+        eq_(len(self.log_fixture.handler.messages['debug']), 0)
+        
