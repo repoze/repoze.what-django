@@ -50,7 +50,7 @@ setup(name="repoze.what-django",
       include_package_data=True,
       zip_safe=False,
       tests_require=[
-          "repoze.what >= 1.0.8",
+          "repoze.what >= 1.1.0-dev",
           "coverage",
           "nose",
           "Django >= 1.2dev",

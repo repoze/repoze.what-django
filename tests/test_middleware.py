@@ -41,7 +41,8 @@ class TestCredentials(object):
         self.middleware.process_request(request)
         eq_(len(request.environ['repoze.what.credentials']['groups']), 0)
         eq_(len(request.environ['repoze.what.credentials']['permissions']), 0)
-        ok_("repoze.what.userid" not in request.environ['repoze.what.credentials'])
+        eq_(request.environ['repoze.what.credentials']["repoze.what.userid"],
+            None)
     
     def test_user_with_groups_and_no_permissions(self):
         environ = {}

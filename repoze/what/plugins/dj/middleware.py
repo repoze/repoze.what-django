@@ -17,6 +17,8 @@ Django middleware for :mod:`repoze.what`.
 
 """
 
+from repoze.what.middleware import setup_request
+
 __all__ = ("RepozeWhatMiddleware", )
 
 
@@ -44,13 +46,14 @@ class RepozeWhatMiddleware(object):
           `http://what.repoze.org/docs/1.x/Manual/ManagingSources.html`_).
         
         """
-        credentials = {}
-        credentials['groups'] = set([g.name for g in request.user.groups])
-        credentials['permissions'] = set(request.user.get_all_permissions())
-        if request.user.is_authenticated():
-            credentials['repoze.what.userid'] = request.user.username
-        # Finally, let's set the credentials dict:
-        request.environ['repoze.what.credentials'] = credentials
+        new_environ = setup_request(request.environ, request.user.username,
+                                    None, None).environ
+        groups = set([g.name for g in request.user.groups])
+        permissions = set(request.user.get_all_permissions())
+        new_environ['repoze.what.credentials']['groups'] = groups
+        new_environ['repoze.what.credentials']['permissions'] = permissions
+        # Finally, let's update the Django environ:
+        request.environ = new_environ
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         pass
