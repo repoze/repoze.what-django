@@ -17,8 +17,12 @@ The :mod:`repoze.what` Django plugin.
 
 """
 
+# Let's import the stuff we want to make accessible from this namespace:
 from repoze.what.plugins.dj.middleware import RepozeWhatMiddleware
+from repoze.what.plugins.dj.utils import (is_met, not_met, enforce, can_access,
+                                          can_access_reverse)
 
 
-__all__ = ("RepozeWhatMiddleware", )
+__all__ = ("RepozeWhatMiddleware", "is_met", "not_met", "enforce", "can_access",
+           "can_access_reverse")
 

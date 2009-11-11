@@ -22,6 +22,8 @@ This module only contains mock objects and the like.
 import os
 
 from django.core.handlers.wsgi import WSGIRequest
+from repoze.what.predicates import Predicate
+
 
 # Setting the DJANGO_SETTINGS_MODULE variable so the tests can be run:
 os.environ['DJANGO_SETTINGS_MODULE'] = "tests.fixtures.sampledjango.settings"
@@ -109,3 +111,15 @@ class MockMessageSet(object):
     
     def create(self, msg):
         self.messages.append(msg)
+
+
+class MockPredicate(Predicate):
+    message = "Mock predicate"
+    
+    def __init__(self, result=True, *args, **kwargs):
+        self.result = result
+        super(MockPredicate, self).__init__(*args, **kwargs)
+    
+    def evaluate(self, environ, credentials):
+        if not self.result:
+            self.unmet()
