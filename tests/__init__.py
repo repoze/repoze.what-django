@@ -72,6 +72,7 @@ class User(object):
         self.username = username
         self.groups = groups
         self.permissions = permissions
+        self.message_set = MockMessageSet()
     
     def get_group_permissions(self):
         return ()
@@ -99,3 +100,11 @@ class Group(object):
 
 
 #}
+
+
+class MockMessageSet(object):
+    def __init__(self):
+        self.messages = []
+    
+    def create(self, msg):
+        self.messages.append(msg)
