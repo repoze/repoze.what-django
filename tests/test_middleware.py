@@ -21,6 +21,7 @@ from nose.tools import eq_, ok_
 from django.http import HttpResponse
 
 from repoze.what.plugins.dj import RepozeWhatMiddleware
+from repoze.what.plugins.dj.utils import _AuthorizationDenial
 
 from tests import Request, make_user
 from tests.fixtures.loggers import LoggingHandlerFixture
@@ -120,7 +121,7 @@ class TestAuthorizationEnforcement(object):
         eq_(response, None)
         eq_(len(self.log_fixture.handler.messages['info']), 1)
         eq_(self.log_fixture.handler.messages['info'][0],
-            "No authorization decision made on /app2/nothing")
+            "No authorization decision made on ingress at /app2/nothing")
     
     def test_authz_granted(self):
         """When authorization is granted nothing must be done."""
@@ -130,7 +131,8 @@ class TestAuthorizationEnforcement(object):
         eq_(response, None)
         eq_(len(self.log_fixture.handler.messages['info']), 1)
         eq_(self.log_fixture.handler.messages['info'][0],
-            "Authorization granted on /app1/blog to %s" % repr(request.user))
+            "Authorization granted to %s on ingress at /app1/blog" %
+            repr(request.user))
     
     def test_authorization_denied_without_custom_denial_handler(self):
         """
@@ -145,7 +147,8 @@ class TestAuthorizationEnforcement(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied on /app2/secret to %s" % repr(request.user))
+            "Authorization denied on ingress to %s at /app2/secret" %
+            repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 1)
         eq_(self.log_fixture.handler.messages['debug'][0],
             "No custom denial handler defined; using the default one")
@@ -162,6 +165,68 @@ class TestAuthorizationEnforcement(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied on /app1/admin to %s" % repr(request.user))
+            "Authorization denied on ingress to %s at /app1/admin" %
+            repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 0)
+
+
+class TestAuthorizationDeniedInView(object):
+    """
+    Authorization denied in the views must be dealt with properly.
+    
+    This is the test case for RepozeWhatMiddleware.process_exception()
+    
+    """
+    
+    def setUp(self):
+        self.middleware = RepozeWhatMiddleware()
+        self.log_fixture = LoggingHandlerFixture()
+    
+    def tearDown(self):
+        self.log_fixture.undo()
+    
+    def test_authorization_denied_with_custom_handler(self):
+        """
+        When authorization is denied with a custom handler, it must be used
         
+        """
+        request = Request({'PATH_INFO': "/"}, make_user(None))
+        exception = _AuthorizationDenial(
+            "Nothing",
+            lambda request, message: "No! %s" % message
+            )
+        response = self.middleware.process_exception(request, exception)
+        eq_(response, "No! Nothing")
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['warning']), 1)
+        eq_(self.log_fixture.handler.messages['warning'][0],
+            "Authorization denied to %s in the view at /" % repr(request.user))
+        eq_(len(self.log_fixture.handler.messages['debug']), 0)
+    
+    def test_authorization_denied_without_custom_handler(self):
+        """
+        When authorization is denied with no custom handler, the default one
+        must be used.
+        
+        """
+        request = Request({}, make_user(None))
+        exception = _AuthorizationDenial("You can't be here", None)
+        response = self.middleware.process_exception(request, exception)
+        eq_(response.status_code, 401)
+        eq_(len(request.user.message_set.messages), 1)
+        eq_(request.user.message_set.messages[0], "You can't be here")
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['warning']), 1)
+        eq_(self.log_fixture.handler.messages['warning'][0],
+            "Authorization denied to %s in the view at /" % repr(request.user))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Using the default denial handler")
+    
+    def test_another_exception(self):
+        """process_exception() must do nothing if not given a denial handler."""
+        request = Request({}, make_user(None))
+        exception = Exception()
+        response = self.middleware.process_exception(request, exception)
+        eq_(response, None)
+
