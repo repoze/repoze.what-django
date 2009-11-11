@@ -147,8 +147,8 @@ class TestAuthorizationEnforcement(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied on ingress to %s at /app2/secret" %
-            repr(request.user))
+            "Authorization denied on ingress to %s at /app2/secret: %s" %
+            (repr(request.user), "This is a secret"))
         eq_(len(self.log_fixture.handler.messages['debug']), 1)
         eq_(self.log_fixture.handler.messages['debug'][0],
             "No custom denial handler defined; using the default one")
@@ -165,7 +165,7 @@ class TestAuthorizationEnforcement(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied on ingress to %s at /app1/admin" %
+            "Authorization denied on ingress to %s at /app1/admin: Get out!" %
             repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 0)
 
@@ -200,7 +200,8 @@ class TestAuthorizationDeniedInView(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied to %s in the view at /" % repr(request.user))
+            "Authorization denied to %s in the view at /: Nothing" %
+            repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 0)
     
     def test_authorization_denied_without_custom_handler(self):
@@ -218,7 +219,8 @@ class TestAuthorizationDeniedInView(object):
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
-            "Authorization denied to %s in the view at /" % repr(request.user))
+            "Authorization denied to %s in the view at /: You can't be here" %
+            repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 1)
         eq_(self.log_fixture.handler.messages['debug'][0],
             "Using the default denial handler")

@@ -125,8 +125,9 @@ class RepozeWhatMiddleware(object):
         
         # We have to deny authorization.
         
-        _LOGGER.warn("Authorization denied on ingress to %s at %s",
-                     request.user, request.environ['PATH_INFO'])
+        _LOGGER.warn(u"Authorization denied on ingress to %s at %s: %s",
+                     request.user, request.environ['PATH_INFO'],
+                     authz_decision.message)
         
         if authz_decision.denial_handler is None:
             _LOGGER.debug("No custom denial handler defined; using the default "
@@ -144,8 +145,9 @@ class RepozeWhatMiddleware(object):
         if isinstance(exception, _AuthorizationDenial):
             # Authorization was denied in the view. Let's handle it.
             
-            _LOGGER.warn("Authorization denied to %s in the view at %s",
-                         request.user, request.environ['PATH_INFO'])
+            _LOGGER.warn("Authorization denied to %s in the view at %s: %s",
+                         request.user, request.environ['PATH_INFO'],
+                         exception.reason)
             
             if exception.handler is None:
                 _LOGGER.debug("Using the default denial handler")
