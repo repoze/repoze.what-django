@@ -1,0 +1,1 @@
+"""Mock app without authz controls."""

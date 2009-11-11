@@ -14,6 +14,8 @@
 ##############################################################################
 """Django settings for sampledjango project."""
 
+from repoze.what.acl import ACLCollection
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -91,4 +93,9 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    "tests.fixtures.sampledjango.app1",
+    "tests.fixtures.sampledjango.app2",
+    "tests.fixtures.sampledjango.unsecured_app",
 )
+
+GLOBAL_ACL_COLLECTION = ACLCollection(allow_by_default=False)

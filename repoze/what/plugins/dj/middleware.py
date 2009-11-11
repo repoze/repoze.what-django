@@ -17,9 +17,18 @@ Django middleware for :mod:`repoze.what`.
 
 """
 
+from logging import getLogger
+
+from django.conf import settings
+from django.utils.importlib import import_module
+
 from repoze.what.middleware import setup_request
+from repoze.what.acl import ACLCollection
 
 __all__ = ("RepozeWhatMiddleware", )
+
+
+_LOGGER = getLogger(__name__)
 
 
 class RepozeWhatMiddleware(object):
@@ -27,6 +36,41 @@ class RepozeWhatMiddleware(object):
     Django middleware to support :mod:`repoze.what`-powered authorization.
     
     """
+    
+    def __init__(self):
+        """
+        Set the global ACL collection and attach the application-specific
+        authorization controls to it.
+        
+        If there's an ACL collection set in the ``GLOBAL_ACL_COLLECTION``
+        setting, then use it instead.
+        
+        """
+        # If there's no global ACL collection, create one:
+        if hasattr(settings, "GLOBAL_ACL_COLLECTION"):
+            self.acl_collection = settings.GLOBAL_ACL_COLLECTION
+        else:
+            self.acl_collection = ACLCollection()
+        
+        # Let's get the authorization controls for every Django application:
+        secured_apps = []
+        for app in settings.INSTALLED_APPS:
+            authz_module_name = "%s.authz" % app
+            try:
+                authz_module = import_module(authz_module_name)
+            except ImportError:
+                continue
+            if not hasattr(authz_module, "control"):
+                continue
+            self.acl_collection.add_acl(authz_module.control)
+            secured_apps.append(app)
+        
+        if secured_apps:
+            secured_apps = ", ".join(secured_apps)
+            _LOGGER.info("The following applications are secured: %s",
+                         secured_apps)
+        else:
+            _LOGGER.warn("No application is secured")
     
     def process_request(self, request):
         """
