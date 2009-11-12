@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'repoze.what-django'
-copyright = u'2009, 2degrees, Ltd.'
+copyright = u'2009, 2degrees Limited'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -203,4 +203,8 @@ latex_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {
+    'http://docs.python.org/': None,
+    'http://what.repoze.org/docs/1.x/': None,
+    'http://docs.djangoproject.com/en/dev/': "http://docs.djangoproject.com/en/dev/_objects/",
+    }
