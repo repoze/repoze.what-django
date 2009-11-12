@@ -94,8 +94,13 @@ class RepozeWhatMiddleware(object):
           `http://what.repoze.org/docs/1.x/Manual/ManagingSources.html`_).
         
         """
-        new_environ = setup_request(request.environ, request.user.username,
-                                    None, None).environ
+        new_environ = setup_request(
+            request.environ,
+            request.user.username,
+            None,
+            None,
+            self.acl_collection
+            ).environ
         groups = set([g.name for g in request.user.groups])
         permissions = set(request.user.get_all_permissions())
         new_environ['repoze.what.credentials']['groups'] = groups
