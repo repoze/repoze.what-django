@@ -56,7 +56,7 @@ setup(name="repoze.what-django",
           "Django >= 1.2dev",
           ],
       install_requires=[
-          "repoze.what >= 1.0.8",
+          "repoze.what >= 1.1.0-dev",
           "Django >= 1.2dev",
           "decorator >= 3.0",
           ],
