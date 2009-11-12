@@ -29,7 +29,7 @@ setup(name="repoze.what-django",
       description=("The repoze.what v1 plugin for Django integration"),
       long_description=README,
       classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 2 - Pre-Alpha",
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
