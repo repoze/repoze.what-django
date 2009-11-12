@@ -20,7 +20,7 @@ Tests for the utilities denied at :mod:`repoze.what.plugins.dj.utils`.
 
 from nose.tools import eq_, ok_, assert_false
 
-from repoze.what.plugins.dj import is_met, not_met, enforce
+from repoze.what.plugins.dj import is_met, not_met, enforce, require
 from repoze.what.plugins.dj.utils import _AuthorizationDenial
 
 from tests import Request, make_user, MockPredicate
@@ -88,4 +88,63 @@ class TestEnforcer(object):
             eq_(authz_denial.handler, expected_denial_handler)
         else:
             raise AssertionError("Authorization denial not raised")
+    
+
+class TestRequire(object):
+    """Tests for the @require decorator."""
+    
+    def setUp(self):
+        self.req = Request({}, make_user(None))
+    
+    def test_require_with_predicate_met(self):
+        protected_view = require(MockPredicate())(mock_view)
+        eq_(protected_view(self.req), "Got it")
+    
+    def test_require_with_predicate_unmet(self):
+        protected_view = require(MockPredicate(False))(mock_view)
+        self._check_enforcement(protected_view)
+    
+    def test_require_with_predicate_unmet_with_message(self):
+        protected_view = require(MockPredicate(False), "Go away")(mock_view)
+        self._check_enforcement(protected_view, expected_message="Go away")
+    
+    def test_require_with_predicate_unmet_with_denial_handler(self):
+        denial_handler = object()
+        protected_view = require(
+            MockPredicate(False),
+            denial_handler=denial_handler,
+            )(mock_view)
+        self._check_enforcement(protected_view,
+                                expected_denial_handler=denial_handler)
+    
+    def test_require_with_predicate_unmet_with_message_and_denial_handler(self):
+        denial_handler = object()
+        protected_view = require(
+            MockPredicate(False),
+            "Go away",
+            denial_handler,
+            )(mock_view)
+        self._check_enforcement(protected_view, expected_message="Go away",
+                                expected_denial_handler=denial_handler)
+    
+    def _check_enforcement(self, protected_view, expected_message=None,
+                           expected_denial_handler=None):
+        """Make sure ``predicate`` is not met and enforced as expected."""
+        try:
+            protected_view(self.req)
+        except _AuthorizationDenial, authz_denial:
+            eq_(authz_denial.reason, expected_message)
+            eq_(authz_denial.handler, expected_denial_handler)
+        else:
+            raise AssertionError("Authorization denial not raised")
+
+
+#{ Mock objects
+
+
+def mock_view(request):
+    return "Got it"
+
+
+#}
 

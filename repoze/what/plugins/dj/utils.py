@@ -18,7 +18,12 @@ In-view utilities for the :mod:`repoze.what` Django plugin.
 
 """
 
-__all__ = ("is_met", "not_met", "enforce", "can_access", "can_access_reverse")
+from functools import wraps
+
+from django.utils.decorators import auto_adapt_to_methods
+
+__all__ = ("is_met", "not_met", "enforce", "require", "can_access",
+           "can_access_reverse")
 
 
 #{ Predicate evaluation functions
@@ -92,6 +97,30 @@ class _AuthorizationDenial(Exception):
     def __init__(self, reason, handler):
         self.reason = reason
         self.handler = handler
+
+
+def require(predicate, msg=None, denial_handler=None):
+    """
+    Enforce ``predicate`` before running a view.
+    
+    :param predicate: The :mod:`repoze.what` predicate to be evaluated.
+    :type predicate: :class:`repoze.what.predicates.Predicate`
+    :param msg: The message to be displayed to the user if authorization is
+        denied.
+    :type msg: :class:`basestring`
+    :param denial_handler: The denial handler to be used if authorization is
+        denied.
+    
+    This is a decorator for Django views, so you can be sure that it's safe
+    to proceed with the view.
+    
+    """
+    def decorator(view_func):
+        def _wrapped_view(request, *args, **kwargs):
+            enforce(predicate, request, msg, denial_handler)
+            return view_func(request, *args, **kwargs)
+        return wraps(view_func)(_wrapped_view)
+    return auto_adapt_to_methods(decorator)
 
 
 #{ View access verifying functions
