@@ -15,18 +15,16 @@
 
 from django.conf.urls.defaults import *
 
+from tests.fixtures.sampledjango.app1 import urls as app1_urls
+from tests.fixtures.sampledjango.app2 import urls as app2_urls
+from tests.fixtures.sampledjango.unsecured_app import urls as unsecured_urls
+
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^sampledjango/', include('sampledjango.foo.urls')),
-
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # (r'^admin/', include(admin.site.urls)),
+    (r'^app1/', include(app1_urls)),
+    (r'^app2/', include(app2_urls)),
+    (r'^unsecured_app/', include(unsecured_urls)),
 )

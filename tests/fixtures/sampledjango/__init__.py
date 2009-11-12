@@ -16,3 +16,5 @@
 Mock Django application to test the repoze.what Django plugin.
 
 """
+
+mock_view = lambda request: "Response"

@@ -18,12 +18,21 @@ In-view utilities for the :mod:`repoze.what` Django plugin.
 
 """
 
+from logging import getLogger
 from functools import wraps
 
+from webob import Request
+from django.conf import settings
+from django.core.urlresolvers import RegexURLResolver
 from django.utils.decorators import auto_adapt_to_methods
 
-__all__ = ("is_met", "not_met", "enforce", "require", "can_access",
-           "can_access_reverse")
+from repoze.what.internals import forge_request
+
+
+__all__ = ("is_met", "not_met", "enforce", "require", "can_access")
+
+
+_LOGGER = getLogger(__name__)
 
 
 #{ Predicate evaluation functions
@@ -127,11 +136,58 @@ def require(predicate, msg=None, denial_handler=None):
 
 
 def can_access(path, request):
-    pass
+    """
+    Forge a request to ``path`` and report whether authorization would be
+    granted on ingress.
+    
+    :param path: The path to another place in the website; it may include the
+        query string.
+    :type path: :class:`basestring`
+    :param request: The Django request to be used as an starting point to forge
+        the request.
+    :type request: :class:`django.http.HttpRequest`
+    :raises django.core.urlresolvers.Resolver404: If ``path`` does not exist.
+    
+    """
+    (view_func, positional_args, named_args) = _get_view_and_args(path, request)
+    
+    # At this point ``path`` does exist, so it's safe to move on.
+    
+    authz_control = request.environ['repoze.what.global_control']
+    forged_request = forge_request(request.environ, path, positional_args,
+                                   named_args)
+    
+    # Finally, let's verify if authorization would be granted:
+    decision = authz_control.decide_authorization(forged_request.environ,
+                                                  view_func)
+    if decision is None or decision.allow:
+        # Authorization would be granted.
+        _LOGGER.debug("Authorization would be granted on ingress to %s at %s",
+                      request.user, path)
+        would_access = True
+    else:
+        # Authorization would be denied.
+        _LOGGER.debug("Authorization would be denied on ingress to %s at %s",
+                      request.user, path)
+        would_access = False
+    
+    return would_access
 
 
-def can_access_reverse(path, request, *args, **kwargs):
-    pass
+#{ Internal stuff
+
+
+def _get_view_and_args(path, request):
+    """
+    Return the view at ``path`` and its named and positional arguments.
+    
+    Django will raise a Resolver404 exception if ``path`` doesn't exist.
+    
+    """
+    # Let's use urlconf from request object, if available:
+    urlconf = getattr(request, "urlconf", settings.ROOT_URLCONF)
+    resolver = RegexURLResolver(r"^/", urlconf)
+    return resolver.resolve(path)
 
 
 #}

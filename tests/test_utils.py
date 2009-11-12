@@ -18,12 +18,15 @@ Tests for the utilities denied at :mod:`repoze.what.plugins.dj.utils`.
 
 """
 
-from nose.tools import eq_, ok_, assert_false
+from nose.tools import eq_, ok_, assert_false, assert_raises
 
-from repoze.what.plugins.dj import is_met, not_met, enforce, require
+from django.core.urlresolvers import Resolver404
+from repoze.what.plugins.dj import (is_met, not_met, enforce, require,
+                                    can_access, RepozeWhatMiddleware)
 from repoze.what.plugins.dj.utils import _AuthorizationDenial
 
 from tests import Request, make_user, MockPredicate
+from tests.fixtures.loggers import LoggingHandlerFixture
 
 
 class TestIsMet(object):
@@ -137,6 +140,54 @@ class TestRequire(object):
             eq_(authz_denial.handler, expected_denial_handler)
         else:
             raise AssertionError("Authorization denial not raised")
+
+
+class TestCanAccess(object):
+    """Tests for the can_access() function."""
+    
+    def setUp(self):
+        # Let's set up the environment for this mock request:
+        mw = RepozeWhatMiddleware()
+        self.request = Request({'PATH_INFO': "/"}, make_user(None))
+        mw.process_request(self.request)
+        mw.process_view(self.request, None, None, None)
+        # Let's enabled logging after the middleware has been set:
+        self.log_fixture = LoggingHandlerFixture()
+    
+    def tearDown(self):
+        self.log_fixture.undo()
+    
+    def test_no_authz_decision_made(self):
+        """Authorization would be granted if no decision was made."""
+        ok_(can_access("/app2/nothing", self.request))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be granted on ingress to %s at /app2/nothing" %
+            repr(self.request.user))
+    
+    def test_authz_granted(self):
+        """Authorization would be granted if it's granted!."""
+        ok_(can_access("/app1/blog", self.request))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be granted on ingress to %s at /app1/blog" %
+            repr(self.request.user))
+    
+    def test_authz_denied(self):
+        """Authorization would be denied if it's denied!."""
+        assert_false(can_access("/app1/admin", self.request))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be denied on ingress to %s at /app1/admin" %
+            repr(self.request.user))
+    
+    def test_non_existing_path(self):
+        """
+        Django's Resolver404 exception must be raised if the path doesn't exist.
+        
+        """
+        assert_raises(Resolver404, can_access, "/app1/non-existing",
+                      self.request)
 
 
 #{ Mock objects
