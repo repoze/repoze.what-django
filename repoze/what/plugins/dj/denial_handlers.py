@@ -19,7 +19,7 @@ Default denial handler implementation.
 
 from django.http import HttpResponse
 
-__all__ = ("default_denial_handler")
+__all__ = ("default_denial_handler", )
 
 
 def default_denial_handler(request, denial_reason):
