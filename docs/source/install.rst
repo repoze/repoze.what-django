@@ -8,8 +8,8 @@ Installing Django
 =================
 
 Unfortunately, installing this package is not as easy as it should be because of
-Django's poor WSGI support. You need to patch your version of Django to improve
-its interoperability and then you'll be able to use WSGI middleware like
+Django's limited WSGI support. You need to patch your version of Django to
+improve its interoperability and then you'll be able to use WSGI middleware like
 :mod:`repoze.what` within Django.
 
 .. note::
