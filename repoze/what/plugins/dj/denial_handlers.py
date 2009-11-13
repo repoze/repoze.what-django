@@ -13,7 +13,7 @@
 #
 ##############################################################################
 """
-Default denial handler implementation.
+Default denial handler implementations.
 
 """
 
@@ -24,15 +24,23 @@ __all__ = ("default_denial_handler", )
 
 def default_denial_handler(request, denial_reason):
     """
-    Return a 401/403 response and explain the user why authorization was denied.
+    Return a ``401``/``403`` response and explain the user why authorization
+    was denied.
     
-    This will return a 401 status if the user is anonymous or 403 if the user
-    is authenticated.
+    :param request: The Django request object
+    :type request: :class:`django.http.HttpRequest`
+    :param denial_reason: The reason why authorization was denied
+    :type denial_reason: :class:`basestring` or ``None``
+    :return: The Django response
+    :rtype: :class:`django.http.HttpResponse`
     
-    Strictly speaking, a 401 status must come along a ``WWW-Authenticate``
-    header, but because we are only dealing with authorization, it's up to the
-    authentication routine to challenge the user however it wants -- Even
-    replacing the 401 status code with something else.
+    This will return a ``401`` response if the user is anonymous or ``403`` if
+    the user is authenticated.
+    
+    Strictly speaking, a ``401`` status must come along a ``WWW-Authenticate``
+    header, but because we are only dealing with authorization, we are not going
+    to do it -- It's up to the authentication routine to challenge the user
+    however it wants, even replacing the ``401`` status code with something else.
     
     If a ``denial_reason`` is set, it will be shown to the user.
     

@@ -49,6 +49,27 @@ def is_met(predicate, request):
     :return: Whether the ``predicate`` is met.
     :rtype: :class:`bool`
     
+    This function is intented to help you get finer grained control on what
+    is authorized. If you are controlling access to the whole view, this
+    function is not the right one: Use :func:`@require
+    <repoze.what.plugins.dj.require` or :func:`enforce
+    <repoze.what.plugins.dj.enforce>` instead.
+    
+    Sample use::
+    
+        from django.http import HttpResponse
+        
+        from repoze.what.plugins.dj import is_met
+        from repoze.what.predicates import not_anonymous
+        from repoze.what.plugins.ip import ip_from
+        
+        def my_view(request):
+            if is_met(not_anonymous() & ip_from(["127.0.0.1", "192.168.1.0/24"]), request):
+                request.user.message_set.create("This is a secret message. "
+                                                "Only people on this network "
+                                                "can see it.")
+            return HttpResponse("Hi there!")
+    
     """
     return predicate.is_met(request.environ)
 
@@ -63,6 +84,28 @@ def not_met(predicate, request):
     :type request: :class:`django.http.HttpRequest`
     :return: Whether the ``predicate`` is **not** met.
     :rtype: :class:`bool`
+    
+    This function is intented to help you get finer grained control on what
+    is authorized. If you are controlling access to the whole view, this
+    function is not the right one: Use :func:`@require
+    <repoze.what.plugins.dj.require` or :func:`enforce
+    <repoze.what.plugins.dj.enforce>` instead.
+    
+    Sample use::
+    
+        from django.http import HttpResponse
+        
+        from repoze.what.plugins.dj import not_met
+        from repoze.what.predicates import not_anonymous
+        from repoze.what.plugins.ip import ip_from
+        
+        def my_view(request):
+            rights = ["You can watch TV", "You can eat", "You can jump"]
+            if not_met(not_anonymous() & ip_from(["127.0.0.1", "192.168.1.0/24"]), request):
+                # If the user is not authenticated and within the local network,
+                # he cannot watch TV!
+                del rights[0]
+            return HttpResponse(", ".join(rights))
     
     """
     return not is_met(predicate, request)
@@ -82,6 +125,22 @@ def enforce(predicate, request, msg=None, denial_handler=None):
     :param denial_handler: The denial handler to be used if authorization is
         denied.
     :raises _AuthorizationDenial: If the ``predicate`` is not met.
+    
+    Sample use::
+    
+        from django.http import HttpResponse
+        
+        from repoze.what.predicates import in_any_group
+        from repoze.what.plugins.dj import enforce
+        
+        def sample_view(request):
+            enforce(in_any_group("admins", "dev"))
+            return HttpResponse("You're an admin and/or a developer!")
+    
+    If the user does not belong to the "admins" or "dev" groups, the code
+    inside the view will get executed until the ``enforce()`` statement, where
+    an exception will be raised and authorization will be denied using the
+    default handler.
     
     """
     if not_met(predicate, request):
@@ -110,18 +169,32 @@ class _AuthorizationDenial(Exception):
 
 def require(predicate, msg=None, denial_handler=None):
     """
-    Enforce ``predicate`` before running a view.
+    Enforce ``predicate`` **before** running a view.
     
     :param predicate: The :mod:`repoze.what` predicate to be evaluated.
     :type predicate: :class:`repoze.what.predicates.Predicate`
     :param msg: The message to be displayed to the user if authorization is
         denied.
     :type msg: :class:`basestring`
-    :param denial_handler: The denial handler to be used if authorization is
-        denied.
+    :param denial_handler: The handler to be used if authorization is denied.
     
     This is a decorator for Django views, so you can be sure that it's safe
     to proceed with the view.
+    
+    Sample use::
+    
+        from django.http import HttpResponse
+        
+        from repoze.what.predicates import in_any_group
+        from repoze.what.plugins.dj import require
+        
+        @require(in_any_group("admins", "dev"))
+        def sample_view(request):
+            return HttpResponse("You're an admin and/or a developer!")
+    
+    If the user does not belong to the "admins" or "dev" groups, the code
+    inside the view won't get executed and authorization will be denied using
+    the default handler.
     
     """
     def decorator(view_func):
@@ -147,6 +220,34 @@ def can_access(path, request):
         the request.
     :type request: :class:`django.http.HttpRequest`
     :raises django.core.urlresolvers.Resolver404: If ``path`` does not exist.
+    
+    Sample use::
+    
+        from django.core.urlresolvers import reverse
+        from django.http import HttpResponse, HttpResponseRedirect
+        
+        from repoze.what.plugins.dj import can_access
+        
+        def take_me_somewhere(request):
+            if can_access("/admin/", request):
+                # The current user can access the admin site.
+                return HttpResponseRedirect("/admin/")
+            elif can_access("/blog/posts/16", request):
+                # The current user can access blog post #16.
+                return HttpResponseRedirect("/admin/")
+            
+            if not can_access("/", request):
+                # The current user cannot access the homepage.
+                request.user.message_set.create("You cannot even visit the "
+                                                "homepage!")
+            
+            return HttpResponse("You're staying here in the mean time!")
+    
+    .. note::
+        Only access rules available in the global ACL collection will be taken
+        into account. Rules set with :func:`@require
+        <repoze.what.plugins.dj.require` or :func:`enforce
+        <repoze.what.plugins.dj.enforce>` cannot be taken into account.
     
     """
     (view_func, positional_args, named_args) = _get_view_and_args(path, request)

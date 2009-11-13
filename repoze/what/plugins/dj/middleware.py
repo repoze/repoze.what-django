@@ -78,7 +78,7 @@ class RepozeWhatMiddleware(object):
     
     def process_request(self, request):
         """
-        Define the repoze.what credentials.
+        Define the :mod:`repoze.what` credentials.
         
         This is nasty and shouldn't be necessary, but:
         
@@ -91,7 +91,10 @@ class RepozeWhatMiddleware(object):
           to retrieve the groups and permissions because we can use the user
           object in the request. In the future we might write them to take
           advantage of the other benefits (See:
-          `http://what.repoze.org/docs/1.x/Manual/ManagingSources.html`_).
+          `<http://what.repoze.org/docs/1.x/Manual/ManagingSources.html>`_).
+        
+        This functionality had to be factored out in the core of
+        :mod:`repoze.what` so we can use it here. Thank you, Django!
         
         """
         new_environ = setup_request(
@@ -113,8 +116,16 @@ class RepozeWhatMiddleware(object):
         Check if authorization should be granted for this request or reject
         access if not.
         
-        This will also update the :mod:`repoze.what`'s ``named_args`` and
-        ``positional_args`` keys in the WGSI environment.
+        Authorization will be granted if either:
+        
+        - it was explicitly granted according to the global ACL collection.
+        - no decision was made by the global ACL collection.
+        
+        It will only be denied if authorization was explicitly denied by the
+        global ACL collection.
+        
+        Whatever happens will be logged every time. Denials will be logged as
+        warnings and the rest as informational logs.
         
         """
         authz_decision = self.acl_collection.decide_authorization(request.environ,
@@ -144,8 +155,16 @@ class RepozeWhatMiddleware(object):
     
     def process_exception(self, request, exception):
         """
-        Run the default denial handler if a :class:`repoze.what` was raised
-        within the view.
+        Generate a proper response if authorization was denied in the view.
+        
+        Both :func:`@require <repoze.what.plugins.dj.require>` and
+        :func:`enforce <repoze.what.plugins.dj.enforce>` rely on this.
+        
+        If no authorization denial handler was explicitly set,
+        :func:`repoze.what.plugins.dj.denial_handlers.default_denial_handler`
+        will be used.
+        
+        When authorization is denied, a warning will be logged.
         
         """
         if isinstance(exception, _AuthorizationDenial):
