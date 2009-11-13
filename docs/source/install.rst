@@ -28,12 +28,16 @@ able to copy and paste it directly on your terminal):
 
 .. code-block:: bash
 
-    # First, download the patch:
+    # First, download and extract Django:
+    wget http://media.djangoproject.com/releases/1.1.1/Django-1.1.1.tar.gz
+    tar xzf Django-1.1.1.tar.gz
+    cd Django-1.1.1
+    # Second, download the patch:
     wget http://what.repoze.org/docs/plugins/django/_static/wsgi-support-django-111.patch
-    # Second, `cd` into the directory where Django is installed:
-    cd `python -c "from django import __file__ as django_path; print django_path[:-12]"`
-    # Finally, apply the patch:
+    # Next, apply the patch:
     patch -p0 < wsgi-support-django-111.patch
+    # And finally, install Django:
+    python setup.py install
 
 You may need to adjust the commands above depending on your system.
 
@@ -72,7 +76,7 @@ Or, if you want to `download a release
     cd repoze.what-django-1.XXX
     python setup.py install
 
-Finally, to install the development version:
+Finally, if you'd rather install the development version:
 
 .. code-block:: bash
 
