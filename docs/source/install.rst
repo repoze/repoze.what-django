@@ -14,7 +14,7 @@ improve its interoperability and then you'll be able to use WSGI middleware like
 
 .. note::
     We're trying to get these changes applied in Django and we're maintaining a
-    `branch on Bitbucket <https://Gustavo@bitbucket.org/Gustavo/django-wsgi/>`_
+    `branch on Bitbucket <https://bitbucket.org/Gustavo/django-wsgi/>`_
     until they are applied.
     
     If they are applied using a different approach to ours, we'll adapt this
