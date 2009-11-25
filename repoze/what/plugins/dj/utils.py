@@ -24,7 +24,6 @@ from functools import wraps
 from webob import Request
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver
-from django.utils.decorators import auto_adapt_to_methods
 
 from repoze.what.internals import forge_request
 
@@ -202,7 +201,7 @@ def require(predicate, msg=None, denial_handler=None):
             enforce(predicate, request, msg, denial_handler)
             return view_func(request, *args, **kwargs)
         return wraps(view_func)(_wrapped_view)
-    return auto_adapt_to_methods(decorator)
+    return decorator
 
 
 #{ View access verifying functions
