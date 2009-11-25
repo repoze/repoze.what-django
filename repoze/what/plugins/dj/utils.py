@@ -208,7 +208,8 @@ def require(predicate, msg=None, denial_handler=None):
 #{ View access verifying functions
 
 
-def can_access(path, request):
+def can_access(path, request, view_func=None, view_args=(),
+               view_kwargs={}):
     """
     Forge a request to ``path`` and report whether authorization would be
     granted on ingress.
@@ -219,7 +220,14 @@ def can_access(path, request):
     :param request: The Django request to be used as an starting point to forge
         the request.
     :type request: :class:`django.http.HttpRequest`
+    :param view_func: The Django view at ``path``.
+    :param view_args: The positional arguments for ``view_func``.
+    :type view_args: :class:`tuple`
+    :param view_kwargs: The named arguments for ``view_func``.
+    :type view_kwargs: :class:`dict`
     :raises django.core.urlresolvers.Resolver404: If ``path`` does not exist.
+    
+    If ``view_func`` is not passed, this function will resolve it.
     
     Sample use::
     
@@ -250,13 +258,15 @@ def can_access(path, request):
         <repoze.what.plugins.dj.enforce>` cannot be taken into account.
     
     """
-    (view_func, positional_args, named_args) = _get_view_and_args(path, request)
+    if not view_func:
+        # The view is not passed; we have to find it!
+        (view_func, view_args, view_kwargs) = _get_view_and_args(path, request)
     
     # At this point ``path`` does exist, so it's safe to move on.
     
     authz_control = request.environ['repoze.what.global_control']
-    forged_request = forge_request(request.environ, path, positional_args,
-                                   named_args)
+    forged_request = forge_request(request.environ, path, view_args,
+                                   view_kwargs)
     
     # Finally, let's verify if authorization would be granted:
     decision = authz_control.decide_authorization(forged_request.environ,

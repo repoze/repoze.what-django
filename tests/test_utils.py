@@ -27,6 +27,7 @@ from repoze.what.plugins.dj.utils import _AuthorizationDenial
 
 from tests import Request, make_user, MockPredicate
 from tests.fixtures.loggers import LoggingHandlerFixture
+from tests.fixtures.sampledjango import mock_view
 
 
 class TestIsMet(object):
@@ -188,6 +189,35 @@ class TestCanAccess(object):
         """
         assert_raises(Resolver404, can_access, "/app1/non-existing",
                       self.request)
+    
+    def test_authz_granted_with_view_resolved(self):
+        """
+        The view shouldn't be resolved if we are passing the view by hand.
+        
+        """
+        positional_args = ()
+        named_args = {}
+        ok_(can_access("/app1/blog", self.request, mock_view, positional_args,
+                       named_args))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be granted on ingress to %s at /app1/blog" %
+            repr(self.request.user))
+    
+    def test_authz_denied_with_view_resolved(self):
+        """
+        The view shouldn't be resolved if we are passing the view by hand.
+        
+        """
+        positional_args = ()
+        named_args = {}
+        assert_false(can_access("/app1/admin", self.request, mock_view,
+                                positional_args, named_args))
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be denied on ingress to %s at /app1/admin" %
+            repr(self.request.user))
+        
 
 
 #{ Mock objects
