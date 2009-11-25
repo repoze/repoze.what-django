@@ -73,7 +73,7 @@ class Request(WSGIRequest):
 class User(object):
     def __init__(self, username, groups, permissions):
         self.username = username
-        self.groups = groups
+        self.groups = GroupSet(groups)
         self.permissions = permissions
         self.message_set = MockMessageSet()
     
@@ -100,6 +100,14 @@ class Group(object):
     
     def __init__(self, name):
         self.name = name
+
+
+class GroupSet(object):
+    def __init__(self, groups):
+        self.groups = groups
+    
+    def all(self):
+        return self.groups
 
 
 #}

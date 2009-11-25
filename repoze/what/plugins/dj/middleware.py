@@ -104,7 +104,7 @@ class RepozeWhatMiddleware(object):
             None,
             self.acl_collection
             ).environ
-        groups = set([g.name for g in request.user.groups])
+        groups = set([g.name for g in request.user.groups.all()])
         permissions = set(request.user.get_all_permissions())
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
