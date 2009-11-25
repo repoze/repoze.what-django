@@ -234,7 +234,7 @@ def can_access(path, request):
                 return HttpResponseRedirect("/admin/")
             elif can_access("/blog/posts/16", request):
                 # The current user can access blog post #16.
-                return HttpResponseRedirect("/admin/")
+                return HttpResponseRedirect("/blog/post/16")
             
             if not can_access("/", request):
                 # The current user cannot access the homepage.
