@@ -123,8 +123,8 @@ class MockMessageSet(object):
     def __init__(self):
         self.messages = []
     
-    def create(self, msg):
-        self.messages.append(msg)
+    def create(self, message):
+        self.messages.append(message)
 
 
 class MockPredicate(Predicate):

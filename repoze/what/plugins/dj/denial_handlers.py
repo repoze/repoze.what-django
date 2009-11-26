@@ -48,7 +48,9 @@ def default_denial_handler(request, denial_reason):
     """
     if request.user.is_authenticated():
         status = 403
-        request.user.message_set.create(denial_reason)
+        
+        if denial_reason:
+            request.user.message_set.create(message=denial_reason)
     else:
         status = 401
     
