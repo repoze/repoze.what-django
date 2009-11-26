@@ -97,15 +97,21 @@ class RepozeWhatMiddleware(object):
         :mod:`repoze.what` so we can use it here. Thank you, Django!
         
         """
+        username = None
+        permissions = set()
+        groups = set([g.name for g in request.user.groups.all()])
+        
+        if request.user.is_authenticated():
+            username = request.user.username
+            permissions = set(request.user.get_all_permissions())
+        
         new_environ = setup_request(
             request.environ,
-            request.user.username,
+            username,
             None,
             None,
             self.acl_collection
             ).environ
-        groups = set([g.name for g in request.user.groups.all()])
-        permissions = set(request.user.get_all_permissions())
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
         # Finally, let's update the Django environ:

@@ -70,12 +70,18 @@ class Request(WSGIRequest):
 #{ Mock Django models
 
 
-class User(object):
+class BaseUser(object):
+    
+    def __init__(self, groups):
+        self.groups = GroupSet(groups)
+
+
+class User(BaseUser):
     def __init__(self, username, groups, permissions):
         self.username = username
-        self.groups = GroupSet(groups)
         self.permissions = permissions
         self.message_set = MockMessageSet()
+        super(User, self).__init__(groups)
     
     def get_group_permissions(self):
         return ()
@@ -87,10 +93,10 @@ class User(object):
         return True
 
 
-class AnonymousUser(User):
+class AnonymousUser(BaseUser):
     
     def __init__(self):
-        super(AnonymousUser, self).__init__(None, (), ())
+        super(AnonymousUser, self).__init__(())
     
     def is_authenticated(self):
         return False

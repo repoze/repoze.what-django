@@ -215,8 +215,6 @@ class TestAuthorizationDeniedInView(object):
         exception = _AuthorizationDenial("You can't be here", None)
         response = self.middleware.process_exception(request, exception)
         eq_(response.status_code, 401)
-        eq_(len(request.user.message_set.messages), 1)
-        eq_(request.user.message_set.messages[0], "You can't be here")
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],
