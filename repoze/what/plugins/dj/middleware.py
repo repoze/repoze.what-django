@@ -137,8 +137,8 @@ class RepozeWhatMiddleware(object):
         authz_decision = self.acl_collection.decide_authorization(request.environ,
                                                                   view_func)
         if authz_decision is None:
-            _LOGGER.info("No authorization decision made on ingress at %s",
-                         request.environ['PATH_INFO'])
+            _LOGGER.debug("No authorization decision made on ingress at %s",
+                          request.environ['PATH_INFO'])
         elif authz_decision.allow:
             _LOGGER.info("Authorization granted to %s on ingress at %s",
                          request.user, request.environ['PATH_INFO'])

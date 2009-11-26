@@ -120,8 +120,8 @@ class TestAuthorizationEnforcement(object):
         request = Request(environ, make_user(None))
         response = self.middleware.process_view(request, object(), (), {})
         eq_(response, None)
-        eq_(len(self.log_fixture.handler.messages['info']), 1)
-        eq_(self.log_fixture.handler.messages['info'][0],
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
             "No authorization decision made on ingress at /app2/nothing")
     
     def test_authz_granted(self):
