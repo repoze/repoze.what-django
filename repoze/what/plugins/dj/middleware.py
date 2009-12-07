@@ -93,8 +93,8 @@ class RepozeWhatMiddleware(object):
           advantage of the other benefits (See:
           `<http://what.repoze.org/docs/1.x/Manual/ManagingSources.html>`_).
         
-        This functionality had to be factored out in the core of
-        :mod:`repoze.what` so we can use it here. Thank you, Django!
+        Well, after all it's not that bad because we can take advantage of this
+        to insert the user object in the :mod:`repoze.what` credentials dict.
         
         """
         username = None
@@ -112,6 +112,7 @@ class RepozeWhatMiddleware(object):
             None,
             self.acl_collection
             ).environ
+        new_environ['repoze.what.credentials']['django_user'] = request.user
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
         # Finally, let's update the Django environ:

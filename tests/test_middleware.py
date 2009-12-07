@@ -98,6 +98,15 @@ class TestCredentials(object):
         eq_(request.environ['repoze.what.credentials']['repoze.what.userid'],
             "foo")
     
+    def test_user_object_is_included(self):
+        """The current user's object should be included in the credentials."""
+        environ = {}
+        req = Request(environ, make_user("foo", [], ("p1", "p2", "p3")))
+        # Running the middleware and checking the resulting environ:
+        self.middleware.process_request(req)
+        ok_("django_user" in req.environ['repoze.what.credentials'])
+        eq_(req.environ['repoze.what.credentials']['django_user'], req.user)
+    
     def test_no_response_returned(self):
         """The middleware's process_request() shouldn't return a response."""
         request = Request({}, make_user(None))
