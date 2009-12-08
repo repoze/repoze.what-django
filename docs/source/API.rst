@@ -21,6 +21,16 @@ These are the functions that are meant to be used in your views:
 .. autofunction:: not_met
 
 
+Django-specific predicate checkers
+==================================
+
+.. autoclass:: is_staff
+
+.. autoclass:: is_active
+
+.. autoclass:: is_superuser
+
+
 Django middleware
 =================
 
