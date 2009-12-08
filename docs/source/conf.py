@@ -201,6 +201,7 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_use_modindex = True
 
+todo_include_todos = True
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
