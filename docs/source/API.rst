@@ -24,11 +24,11 @@ These are the functions that are meant to be used in your views:
 Django-specific predicate checkers
 ==================================
 
-.. autoclass:: is_staff
+.. autoclass:: IsStaff
 
-.. autoclass:: is_active
+.. autoclass:: IsActive
 
-.. autoclass:: is_superuser
+.. autoclass:: IsSuperuser
 
 
 Django middleware

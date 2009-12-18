@@ -21,8 +21,8 @@ from nose.tools import eq_
 
 from repoze.what.predicates import NotAuthorizedError
 
-from repoze.what.plugins.dj import (RepozeWhatMiddleware, is_staff, is_active,
-                                    is_superuser)
+from repoze.what.plugins.dj import (RepozeWhatMiddleware, IsStaff, IsActive,
+                                    IsSuperuser)
 from tests import Request, make_user
 
 
@@ -62,7 +62,7 @@ class BasePredicateTester(object):
 
 
 class TestIsStaff(BasePredicateTester):
-    """Tests for the :class:`is_staff` predicate."""
+    """Tests for the :class:`IsStaff` predicate."""
     
     def test_non_staff_user(self):
         """
@@ -70,7 +70,7 @@ class TestIsStaff(BasePredicateTester):
         
         """
         self.request.user.is_staff = False
-        self.eval_unmet_predicate(is_staff(), self.request.environ,
+        self.eval_unmet_predicate(IsStaff(), self.request.environ,
                                   "The current user must belong to the staff")
     
     def test_staff_user(self):
@@ -79,11 +79,11 @@ class TestIsStaff(BasePredicateTester):
         
         """
         self.request.user.is_staff = True
-        self.eval_met_predicate(is_staff(), self.request.environ)
+        self.eval_met_predicate(IsStaff(), self.request.environ)
 
 
 class TestIsActive(BasePredicateTester):
-    """Tests for the :class:`is_active` predicate."""
+    """Tests for the :class:`IsActive` predicate."""
     
     def test_inactive_account(self):
         """
@@ -92,7 +92,7 @@ class TestIsActive(BasePredicateTester):
         """
         self.request.user.is_active = False
         self.eval_unmet_predicate(
-            is_active(),
+            IsActive(),
             self.request.environ,
             "The account for the current user must be active",
             )
@@ -103,11 +103,11 @@ class TestIsActive(BasePredicateTester):
         
         """
         self.request.user.is_active = True
-        self.eval_met_predicate(is_active(), self.request.environ)
+        self.eval_met_predicate(IsActive(), self.request.environ)
 
 
 class TestIsSuperuser(BasePredicateTester):
-    """Tests for the :class:`is_superuser` predicate."""
+    """Tests for the :class:`IsSuperuser` predicate."""
     
     def test_regular_user(self):
         """
@@ -116,7 +116,7 @@ class TestIsSuperuser(BasePredicateTester):
         """
         self.request.user.is_superuser = False
         self.eval_unmet_predicate(
-            is_superuser(),
+            IsSuperuser(),
             self.request.environ,
             "The current user must be a superuser",
             )
@@ -127,5 +127,5 @@ class TestIsSuperuser(BasePredicateTester):
         
         """
         self.request.user.is_superuser = True
-        self.eval_met_predicate(is_superuser(), self.request.environ)
+        self.eval_met_predicate(IsSuperuser(), self.request.environ)
 

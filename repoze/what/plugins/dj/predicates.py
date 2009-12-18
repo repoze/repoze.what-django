@@ -19,10 +19,10 @@ Django-specific :mod:`repoze.what` predicates.
 
 from repoze.what.predicates import Predicate
 
-__all__ = ("is_staff", "is_active", "is_superuser", "has_module_perms")
+__all__ = ("IsStaff", "IsActive", "IsSuperuser")
 
 
-class is_staff(Predicate):
+class IsStaff(Predicate):
     """
     Check that the current user can access the Django's admin site.
     
@@ -37,7 +37,7 @@ class is_staff(Predicate):
             self.unmet()
 
 
-class is_active(Predicate):
+class IsActive(Predicate):
     """
     Check that the account for the current user is active.
     
@@ -52,7 +52,7 @@ class is_active(Predicate):
             self.unmet()
 
 
-class is_superuser(Predicate):
+class IsSuperuser(Predicate):
     """
     Check that the current user is admin.
     
