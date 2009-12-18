@@ -19,7 +19,8 @@ Django-specific :mod:`repoze.what` predicates.
 
 from repoze.what.predicates import Predicate
 
-__all__ = ("IsStaff", "IsActive", "IsSuperuser")
+__all__ = ("IsStaff", "IsActive", "IsSuperuser", "IS_STAFF", "IS_ACTIVE",
+           "IS_SUPERUSER")
 
 
 class IsStaff(Predicate):
@@ -65,4 +66,17 @@ class IsSuperuser(Predicate):
     def evaluate(self, environ, credentials):
         if not credentials['django_user'].is_superuser:
             self.unmet()
+
+
+#{ Ready to use instances
+
+
+IS_STAFF = IsStaff()
+
+IS_ACTIVE = IsActive()
+
+IS_SUPERUSER = IsSuperuser()
+
+
+#}
 

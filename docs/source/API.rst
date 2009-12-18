@@ -30,6 +30,15 @@ Django-specific predicate checkers
 
 .. autoclass:: IsSuperuser
 
+Ready to use instances
+----------------------
+
+.. autodata:: IS_STAFF
+
+.. autodata:: IS_ACTIVE
+
+.. autodata:: IS_SUPERUSER
+
 
 Django middleware
 =================

@@ -17,12 +17,13 @@ Unit tests for the Django-specific repoze.what predicates.
 
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 
 from repoze.what.predicates import NotAuthorizedError
 
 from repoze.what.plugins.dj import (RepozeWhatMiddleware, IsStaff, IsActive,
-                                    IsSuperuser)
+                                    IsSuperuser, IS_STAFF, IS_ACTIVE,
+                                    IS_SUPERUSER)
 from tests import Request, make_user
 
 
@@ -80,6 +81,9 @@ class TestIsStaff(BasePredicateTester):
         """
         self.request.user.is_staff = True
         self.eval_met_predicate(IsStaff(), self.request.environ)
+    
+    def test_alias(self):
+        ok_(isinstance(IS_STAFF, IsStaff))
 
 
 class TestIsActive(BasePredicateTester):
@@ -104,6 +108,9 @@ class TestIsActive(BasePredicateTester):
         """
         self.request.user.is_active = True
         self.eval_met_predicate(IsActive(), self.request.environ)
+    
+    def test_alias(self):
+        ok_(isinstance(IS_ACTIVE, IsActive))
 
 
 class TestIsSuperuser(BasePredicateTester):
@@ -128,4 +135,7 @@ class TestIsSuperuser(BasePredicateTester):
         """
         self.request.user.is_superuser = True
         self.eval_met_predicate(IsSuperuser(), self.request.environ)
+    
+    def test_alias(self):
+        ok_(isinstance(IS_SUPERUSER, IsSuperuser))
 

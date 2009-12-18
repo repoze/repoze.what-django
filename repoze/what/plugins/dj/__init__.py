@@ -22,9 +22,11 @@ The :mod:`repoze.what` Django plugin.
 from repoze.what.plugins.dj.middleware import RepozeWhatMiddleware
 from repoze.what.plugins.dj.utils import (is_met, not_met, enforce, require,
                                           can_access)
-from repoze.what.plugins.dj.predicates import IsStaff, IsActive, IsSuperuser
+from repoze.what.plugins.dj.predicates import (IsStaff, IsActive, IsSuperuser,
+    IS_STAFF, IS_ACTIVE, IS_SUPERUSER)
 
 
 __all__ = ("RepozeWhatMiddleware", "is_met", "not_met", "enforce", "require",
-           "can_access", "IsStaff", "IsActive", "IsSuperuser")
+           "can_access", "IsStaff", "IsActive", "IsSuperuser", "IS_STAFF",
+           "IS_ACTIVE", "IS_SUPERUSER")
 
