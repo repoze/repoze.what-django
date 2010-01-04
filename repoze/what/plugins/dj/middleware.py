@@ -76,7 +76,7 @@ class RepozeWhatMiddleware(object):
         else:
             _LOGGER.warn("No application is secured")
     
-    def process_request(self, request):
+    def _set_request_up(self, request):
         """
         Define the :mod:`repoze.what` credentials.
         
@@ -135,6 +135,8 @@ class RepozeWhatMiddleware(object):
         warnings and the rest as informational logs.
         
         """
+        self._set_request_up(request)
+        
         authz_decision = self.acl_collection.decide_authorization(request.environ,
                                                                   view_func)
         if authz_decision is None:

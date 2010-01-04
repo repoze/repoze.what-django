@@ -70,7 +70,7 @@ class TestCredentials(object):
         environ = {}
         request = Request(environ, make_user(None))
         # Running the middleware and checking the resulting environ:
-        self.middleware.process_request(request)
+        self.middleware._set_request_up(request)
         eq_(len(request.environ['repoze.what.credentials']['groups']), 0)
         eq_(len(request.environ['repoze.what.credentials']['permissions']), 0)
         eq_(request.environ['repoze.what.credentials']["repoze.what.userid"],
@@ -80,7 +80,7 @@ class TestCredentials(object):
         environ = {}
         request = Request(environ, make_user("foo", ("g1", "g2", "g3")))
         # Running the middleware and checking the resulting environ:
-        self.middleware.process_request(request)
+        self.middleware._set_request_up(request)
         eq_(request.environ['repoze.what.credentials']['groups'],
             set(["g1", "g2", "g3"]))
         eq_(len(request.environ['repoze.what.credentials']['permissions']), 0)
@@ -91,7 +91,7 @@ class TestCredentials(object):
         environ = {}
         request = Request(environ, make_user("foo", [], ("p1", "p2", "p3")))
         # Running the middleware and checking the resulting environ:
-        self.middleware.process_request(request)
+        self.middleware._set_request_up(request)
         eq_(len(request.environ['repoze.what.credentials']['groups']), 0)
         eq_(request.environ['repoze.what.credentials']['permissions'],
             set(["p1", "p2", "p3"]))
@@ -103,14 +103,14 @@ class TestCredentials(object):
         environ = {}
         req = Request(environ, make_user("foo", [], ("p1", "p2", "p3")))
         # Running the middleware and checking the resulting environ:
-        self.middleware.process_request(req)
+        self.middleware._set_request_up(req)
         ok_("django_user" in req.environ['repoze.what.credentials'])
         eq_(req.environ['repoze.what.credentials']['django_user'], req.user)
     
     def test_no_response_returned(self):
-        """The middleware's process_request() shouldn't return a response."""
+        """The middleware's _set_request_up() shouldn't return a response."""
         request = Request({}, make_user(None))
-        eq_(self.middleware.process_request(request), None)
+        eq_(self.middleware._set_request_up(request), None)
 
 
 class TestAuthorizationEnforcement(object):
@@ -122,6 +122,13 @@ class TestAuthorizationEnforcement(object):
     
     def tearDown(self):
         self.log_fixture.undo()
+    
+    def test_environment_is_setup(self):
+        """The WSGI environment must be set up before processing the view."""
+        environ = {'PATH_INFO': "/app2/nothing"}
+        request = Request(environ, make_user(None))
+        self.middleware.process_view(request, object(), (), {})
+        ok_("repoze.what.credentials" in request.environ)
     
     def test_no_authz_decision_made(self):
         """Nothing must be done if no decision was made."""

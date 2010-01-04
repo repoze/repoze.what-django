@@ -57,7 +57,7 @@ class BasePredicateTester(object):
         """Set up the request."""
         mw = RepozeWhatMiddleware()
         self.request = Request({}, make_user("foo"))
-        mw.process_request(self.request)
+        mw._set_request_up(self.request)
     
     #}
 

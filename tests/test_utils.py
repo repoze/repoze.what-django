@@ -150,7 +150,6 @@ class TestCanAccess(object):
         # Let's set up the environment for this mock request:
         mw = RepozeWhatMiddleware()
         self.request = Request({'PATH_INFO': "/"}, make_user(None))
-        mw.process_request(self.request)
         mw.process_view(self.request, None, None, None)
         # Let's enabled logging after the middleware has been set:
         self.log_fixture = LoggingHandlerFixture()
@@ -217,7 +216,6 @@ class TestCanAccess(object):
         eq_(self.log_fixture.handler.messages['debug'][0],
             "Authorization would be denied on ingress to %s at /app1/admin" %
             repr(self.request.user))
-        
 
 
 #{ Mock objects
