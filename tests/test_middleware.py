@@ -40,8 +40,8 @@ class TestAuthzDiscovery(object):
     def test_global_acl_collection_and_secured_apps(self):
         mw = RepozeWhatMiddleware()
         # Checking that the global ACL collection was picked:
-        from tests.fixtures.sampledjango.settings import GLOBAL_ACL_COLLECTION
-        eq_(GLOBAL_ACL_COLLECTION, mw.acl_collection)
+        from tests.fixtures.sampledjango.authz import control
+        eq_(control, mw.acl_collection)
         # Checking that the app-specific controls were picked:
         from tests.fixtures.sampledjango.app1.authz import control as control1
         from tests.fixtures.sampledjango.app2.authz import control as control2

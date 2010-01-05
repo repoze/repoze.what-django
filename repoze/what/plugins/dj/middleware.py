@@ -28,6 +28,7 @@ from repoze.what.acl import ACLCollection
 
 from repoze.what.plugins.dj.denial_handlers import default_denial_handler
 from repoze.what.plugins.dj.utils import _AuthorizationDenial
+from repoze.what.plugins.dj._utils import resolve_object
 
 __all__ = ("RepozeWhatMiddleware", )
 
@@ -52,7 +53,7 @@ class RepozeWhatMiddleware(object):
         """
         # If there's no global ACL collection, create one:
         if hasattr(settings, "GLOBAL_ACL_COLLECTION"):
-            self.acl_collection = settings.GLOBAL_ACL_COLLECTION
+            self.acl_collection = resolve_object(settings.GLOBAL_ACL_COLLECTION)
         else:
             self.acl_collection = ACLCollection()
         

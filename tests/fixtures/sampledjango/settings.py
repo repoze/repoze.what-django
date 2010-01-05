@@ -14,8 +14,6 @@
 ##############################################################################
 """Django settings for sampledjango project."""
 
-from repoze.what.acl import ACLCollection
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -98,4 +96,4 @@ INSTALLED_APPS = (
     "tests.fixtures.sampledjango.unsecured_app",
 )
 
-GLOBAL_ACL_COLLECTION = ACLCollection()
+GLOBAL_ACL_COLLECTION = "tests.fixtures.sampledjango.authz.control"
