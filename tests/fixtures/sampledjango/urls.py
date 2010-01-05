@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the BSD-like license at
