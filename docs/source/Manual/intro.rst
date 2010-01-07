@@ -11,4 +11,14 @@ The plugin ships with a Django middleware which loads all the access rules
 defined across your application when it is run for the first time. 
 
 To start using this plugin, you need to load :mod:`repoze.what`'s middleware
-for Django.
+for Django after the authentication middleware::
+
+    # settings.py
+    
+    MIDDLEWARE_CLASSES = (
+        # ...
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "repoze.what.plugins.dj.RepozeWhatMiddleware",
+        # ...
+    )
+
