@@ -185,6 +185,36 @@ class TestAuthorizationEnforcement(object):
             "Authorization denied on ingress to %s at /app1/admin: Get out!" %
             repr(request.user))
         eq_(len(self.log_fixture.handler.messages['debug']), 0)
+    
+    def test_middleware_skips_media_dir(self):
+        """The middleware must do nothing in the media directory."""
+        environ = {'PATH_INFO': "/media/photo.jpg"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        eq_(response, None)
+        # The environment must not have been set up for repoze.what:
+        ok_("repoze.what.credentials" not in request.environ)
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['info']), 0)
+        eq_(len(self.log_fixture.handler.messages['warning']), 0)
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization checks disabled for media file at /media/photo.jpg")
+    
+    def test_middleware_skips_media_admin_dir(self):
+        """The middleware must do nothing in the media admin directory."""
+        environ = {'PATH_INFO': "/admin-media/photo"}
+        request = Request(environ, make_user(None))
+        response = self.middleware.process_view(request, object(), (), {})
+        eq_(response, None)
+        # The environment must not have been set up for repoze.what:
+        ok_("repoze.what.credentials" not in request.environ)
+        # Checking the logs:
+        eq_(len(self.log_fixture.handler.messages['info']), 0)
+        eq_(len(self.log_fixture.handler.messages['warning']), 0)
+        eq_(len(self.log_fixture.handler.messages['debug']), 1)
+        eq_(self.log_fixture.handler.messages['debug'][0],
+            "Authorization checks disabled for media file at /admin-media/photo")
 
 
 class TestAuthorizationDeniedInView(object):

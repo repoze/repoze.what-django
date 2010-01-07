@@ -135,7 +135,15 @@ class RepozeWhatMiddleware(object):
         Whatever happens will be logged every time. Denials will be logged as
         warnings and the rest as informational logs.
         
+        It does nothing when requested media files.
+        
         """
+        if (request.path.startswith(settings.MEDIA_URL) or
+            request.path.startswith(settings.ADMIN_MEDIA_PREFIX)):
+            _LOGGER.debug("Authorization checks disabled for media file at %s",
+                          request.environ['PATH_INFO'])
+            return
+        
         self._set_request_up(request)
         
         authz_decision = self.acl_collection.decide_authorization(request.environ,
