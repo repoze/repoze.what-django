@@ -388,7 +388,7 @@ Index: django/core/handlers/base.py
 +            # (http://docs.djangoproject.com/en/dev/topics/http/urls/#the-matching-grouping-algorithm).
 +            # For more information about this standard, see
 +            # <http://wsgi.org/wsgi/Specifications/routing_args>.
-+            routing_args = (callback_args, callback_kwargs)
++            routing_args = (callback_args, callback_kwargs.copy())
 +            request.environ['wsgiorg.routing_args'] = routing_args
  
              # Apply view middleware
