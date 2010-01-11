@@ -61,6 +61,7 @@ setup(name="repoze.what-django",
           # http://what.repoze.org/docs/plugins/django/install.html
           #"Django >= 1.1",
           "decorator >= 3.0",
+          "setuptools",
           ],
       test_suite="nose.collector",
       entry_points = """\
