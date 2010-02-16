@@ -133,7 +133,7 @@ def enforce(predicate, request, msg=None, denial_handler=None):
         from repoze.what.plugins.dj import enforce
         
         def sample_view(request):
-            enforce(in_any_group("admins", "dev"))
+            enforce(in_any_group("admins", "dev"), request)
             return HttpResponse("You're an admin and/or a developer!")
     
     If the user does not belong to the "admins" or "dev" groups, the code
