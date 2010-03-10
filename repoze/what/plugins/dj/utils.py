@@ -21,7 +21,6 @@ In-view utilities for the :mod:`repoze.what` Django plugin.
 from logging import getLogger
 from functools import wraps
 
-from webob import Request
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver
 
@@ -70,7 +69,7 @@ def is_met(predicate, request):
             return HttpResponse("Hi there!")
     
     """
-    return predicate.is_met(request.environ)
+    return predicate(request)
 
 
 def not_met(predicate, request):
@@ -107,7 +106,7 @@ def not_met(predicate, request):
             return HttpResponse(", ".join(rights))
     
     """
-    return not is_met(predicate, request)
+    return not predicate(request)
 
 
 def enforce(predicate, request, msg=None, denial_handler=None):

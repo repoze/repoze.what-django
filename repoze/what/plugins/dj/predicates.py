@@ -31,11 +31,8 @@ class IsStaff(Predicate):
     
     """
     
-    message = u"The current user must belong to the staff"
-    
-    def evaluate(self, environ, credentials):
-        if not credentials['django_user'].is_staff:
-            self.unmet()
+    def check(self, request, credentials):
+        return request.user.is_staff
 
 
 class IsActive(Predicate):
@@ -46,11 +43,8 @@ class IsActive(Predicate):
     
     """
     
-    message = u"The account for the current user must be active"
-    
-    def evaluate(self, environ, credentials):
-        if not credentials['django_user'].is_active:
-            self.unmet()
+    def check(self, request, credentials):
+        return request.user.is_active
 
 
 class IsSuperuser(Predicate):
@@ -61,11 +55,8 @@ class IsSuperuser(Predicate):
     
     """
     
-    message = u"The current user must be a superuser"
-    
-    def evaluate(self, environ, credentials):
-        if not credentials['django_user'].is_superuser:
-            self.unmet()
+    def check(self, request, credentials):
+        return request.user.is_superuser
 
 
 #{ Ready to use instances

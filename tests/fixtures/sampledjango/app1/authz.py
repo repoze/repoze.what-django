@@ -10,4 +10,4 @@ silly_denial_handler = lambda request, denial_reason: "No! %s" % denial_reason
 
 control = ACL("/app1")
 control.allow("/blog")
-control.deny("/admin", denial_handler=silly_denial_handler, msg="Get out!")
+control.deny("/admin", denial_handler=silly_denial_handler, reason="Get out!")

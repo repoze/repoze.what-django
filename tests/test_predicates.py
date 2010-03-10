@@ -17,7 +17,7 @@ Unit tests for the Django-specific repoze.what predicates.
 
 """
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, assert_false
 
 from repoze.what.predicates import NotAuthorizedError
 
@@ -30,36 +30,11 @@ from tests import Request, make_user
 class BasePredicateTester(object):
     """Base test case for predicates."""
     
-    def eval_met_predicate(self, p, environ):
-        """Evaluate a predicate that should be met"""
-        eq_(p.check_authorization(environ), None)
-        eq_(p.is_met(environ), True)
-    
-    def eval_unmet_predicate(self, p, environ, expected_error):
-        """Evaluate a predicate that should not be met"""
-        credentials = environ.get('repoze.what.credentials', {})
-        
-        # Testing check_authorization
-        try:
-            p.evaluate(environ, credentials)
-        except NotAuthorizedError, error:
-            eq_(unicode(error), expected_error)
-        else:
-            raise AssertionError("Predicate must not be met; expected error: %s"
-                                 % expected_error)
-        
-        # Testing is_met:
-        eq_(p.is_met(environ), False)
-    
-    #{ Fixture
-    
     def setUp(self):
         """Set up the request."""
         mw = RepozeWhatMiddleware()
         self.request = Request({}, make_user("foo"))
         mw._set_request_up(self.request)
-    
-    #}
 
 
 class TestIsStaff(BasePredicateTester):
@@ -71,8 +46,8 @@ class TestIsStaff(BasePredicateTester):
         
         """
         self.request.user.is_staff = False
-        self.eval_unmet_predicate(IsStaff(), self.request.environ,
-                                  "The current user must belong to the staff")
+        assert_false(IS_STAFF(self.request),
+                     "The current user must belong to the staff")
     
     def test_staff_user(self):
         """
@@ -80,7 +55,7 @@ class TestIsStaff(BasePredicateTester):
         
         """
         self.request.user.is_staff = True
-        self.eval_met_predicate(IsStaff(), self.request.environ)
+        ok_(IS_STAFF(self.request))
     
     def test_alias(self):
         ok_(isinstance(IS_STAFF, IsStaff))
@@ -95,11 +70,8 @@ class TestIsActive(BasePredicateTester):
         
         """
         self.request.user.is_active = False
-        self.eval_unmet_predicate(
-            IsActive(),
-            self.request.environ,
-            "The account for the current user must be active",
-            )
+        assert_false(IS_ACTIVE(self.request),
+                     "The account for the current user must be active")
     
     def test_active_account(self):
         """
@@ -107,7 +79,7 @@ class TestIsActive(BasePredicateTester):
         
         """
         self.request.user.is_active = True
-        self.eval_met_predicate(IsActive(), self.request.environ)
+        ok_(IS_ACTIVE(self.request))
     
     def test_alias(self):
         ok_(isinstance(IS_ACTIVE, IsActive))
@@ -122,11 +94,8 @@ class TestIsSuperuser(BasePredicateTester):
         
         """
         self.request.user.is_superuser = False
-        self.eval_unmet_predicate(
-            IsSuperuser(),
-            self.request.environ,
-            "The current user must be a superuser",
-            )
+        assert_false(IS_SUPERUSER(self.request),
+                     "The current user must be a superuser")
     
     def test_superuser_account(self):
         """
@@ -134,7 +103,7 @@ class TestIsSuperuser(BasePredicateTester):
         
         """
         self.request.user.is_superuser = True
-        self.eval_met_predicate(IsSuperuser(), self.request.environ)
+        ok_(IS_SUPERUSER(self.request))
     
     def test_alias(self):
         ok_(isinstance(IS_SUPERUSER, IsSuperuser))

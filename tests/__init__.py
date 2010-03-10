@@ -21,7 +21,7 @@ This module only contains mock objects and the like.
 
 import os
 
-from django.core.handlers.wsgi import WSGIRequest
+from twod.wsgi.handler import TwodWSGIRequest
 from repoze.what.predicates import Predicate
 
 
@@ -47,7 +47,7 @@ def make_user(username, groups=(), permissions=()):
     return user
 
 
-class Request(WSGIRequest):
+class Request(TwodWSGIRequest):
     """
     Mock Django request.
     
@@ -128,12 +128,10 @@ class MockMessageSet(object):
 
 
 class MockPredicate(Predicate):
-    message = "Mock predicate"
     
     def __init__(self, result=True, *args, **kwargs):
         self.result = result
         super(MockPredicate, self).__init__(*args, **kwargs)
     
-    def evaluate(self, environ, credentials):
-        if not self.result:
-            self.unmet()
+    def check(self, request, credentials):
+        return self.result

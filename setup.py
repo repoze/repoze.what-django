@@ -54,12 +54,12 @@ setup(name="repoze.what-django",
           "coverage",
           "nose",
           "Django >= 1.1",
+          "twod.wsgi >= 1.0a2",
           ],
       install_requires=[
           "repoze.what >= 1.1.0-dev",
-          # Django should be installed by hand so the patch should be applied:
-          # http://what.repoze.org/docs/plugins/django/install.html
-          #"Django >= 1.1",
+          "Django >= 1.1",
+          "twod.wsgi >= 1.0a2",
           "decorator >= 3.0",
           "setuptools",
           ],

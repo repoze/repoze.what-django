@@ -162,14 +162,14 @@ class RepozeWhatMiddleware(object):
         
         _LOGGER.warn(u"Authorization denied on ingress to %s at %s: %s",
                      request.user, request.environ['PATH_INFO'],
-                     authz_decision.message)
+                     authz_decision.reason)
         
         if authz_decision.denial_handler is None:
             _LOGGER.debug("No custom denial handler defined; using the default "
                           "one")
             authz_decision.denial_handler = default_denial_handler
         
-        return authz_decision.denial_handler(request, authz_decision.message)
+        return authz_decision.denial_handler(request, authz_decision.reason)
     
     def process_exception(self, request, exception):
         """
