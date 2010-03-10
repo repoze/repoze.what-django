@@ -56,63 +56,6 @@ class TestAuthzDiscovery(object):
             )
 
 
-class TestCredentials(object):
-    """
-    Tests to make sure the repoze.what credentials are set properly.
-    
-    """
-    
-    def setUp(self):
-        self.middleware = RepozeWhatMiddleware()
-    
-    def test_anonymous_user(self):
-        """Anonymous users shouldn't have groups nor permissions."""
-        environ = {}
-        request = Request(environ, make_user(None))
-        # Running the middleware and checking the resulting environ:
-        self.middleware._set_request_up(request)
-        eq_(len(request.environ['repoze.what.credentials']['groups']), 0)
-        eq_(len(request.environ['repoze.what.credentials']['permissions']), 0)
-        eq_(request.environ['repoze.what.credentials']["repoze.what.userid"],
-            None)
-    
-    def test_user_with_groups_and_no_permissions(self):
-        environ = {}
-        request = Request(environ, make_user("foo", ("g1", "g2", "g3")))
-        # Running the middleware and checking the resulting environ:
-        self.middleware._set_request_up(request)
-        eq_(request.environ['repoze.what.credentials']['groups'],
-            set(["g1", "g2", "g3"]))
-        eq_(len(request.environ['repoze.what.credentials']['permissions']), 0)
-        eq_(request.environ['repoze.what.credentials']['repoze.what.userid'],
-            "foo")
-    
-    def test_user_with_permissions_and_no_groups(self):
-        environ = {}
-        request = Request(environ, make_user("foo", [], ("p1", "p2", "p3")))
-        # Running the middleware and checking the resulting environ:
-        self.middleware._set_request_up(request)
-        eq_(len(request.environ['repoze.what.credentials']['groups']), 0)
-        eq_(request.environ['repoze.what.credentials']['permissions'],
-            set(["p1", "p2", "p3"]))
-        eq_(request.environ['repoze.what.credentials']['repoze.what.userid'],
-            "foo")
-    
-    def test_user_object_is_included(self):
-        """The current user's object should be included in the credentials."""
-        environ = {}
-        req = Request(environ, make_user("foo", [], ("p1", "p2", "p3")))
-        # Running the middleware and checking the resulting environ:
-        self.middleware._set_request_up(req)
-        ok_("django_user" in req.environ['repoze.what.credentials'])
-        eq_(req.environ['repoze.what.credentials']['django_user'], req.user)
-    
-    def test_no_response_returned(self):
-        """The middleware's _set_request_up() shouldn't return a response."""
-        request = Request({}, make_user(None))
-        eq_(self.middleware._set_request_up(request), None)
-
-
 class TestAuthorizationEnforcement(object):
     """Tests for the process_view() routine."""
     
@@ -126,7 +69,7 @@ class TestAuthorizationEnforcement(object):
     def test_environment_is_setup(self):
         """The WSGI environment must be set up before processing the view."""
         environ = {'PATH_INFO': "/app2/nothing"}
-        request = Request(environ, make_user(None))
+        request = Request(environ, make_user("bar"))
         self.middleware.process_view(request, object(), (), {})
         ok_("repoze.what.credentials" in request.environ)
     
