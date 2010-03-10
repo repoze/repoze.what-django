@@ -19,11 +19,11 @@ Unit tests for the Django-specific repoze.what predicates.
 
 from nose.tools import eq_, ok_, assert_false
 
-from repoze.what.internals import setup_request
 from repoze.what.predicates import NotAuthorizedError
-from repoze.what.plugins.dj import (IsStaff, IsActive, IsSuperuser, IS_STAFF,
-                                    IS_ACTIVE, IS_SUPERUSER)
 
+from repoze.what.plugins.dj import (RepozeWhatMiddleware, IsStaff, IsActive,
+                                    IsSuperuser, IS_STAFF, IS_ACTIVE,
+                                    IS_SUPERUSER)
 from tests import Request, make_user
 
 
@@ -32,8 +32,9 @@ class BasePredicateTester(object):
     
     def setUp(self):
         """Set up the request."""
+        mw = RepozeWhatMiddleware()
         self.request = Request({}, make_user("foo"))
-        setup_request(self.request.environ, "foo", None, None)
+        mw._set_request_up(self.request)
 
 
 class TestIsStaff(BasePredicateTester):

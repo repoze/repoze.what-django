@@ -77,6 +77,48 @@ class RepozeWhatMiddleware(object):
         else:
             _LOGGER.warn("No application is secured")
     
+    def _set_request_up(self, request):
+        """
+        Define the :mod:`repoze.what` credentials.
+        
+        This is nasty and shouldn't be necessary, but:
+        
+        - In Django, it's not possible to put WSGI middleware in between
+          the core of the Django app and the basic middleware provided by
+          Django. To be precise, we'd need to place the :mod:`repoze.what`
+          middleware in between Django's authentication routine and the Django
+          application/view.
+        - We are not going to write so-called "repoze.what source adapters"
+          to retrieve the groups and permissions because we can use the user
+          object in the request. In the future we might write them to take
+          advantage of the other benefits (See:
+          `<http://what.repoze.org/docs/1.x/Manual/ManagingSources.html>`_).
+        
+        Well, after all it's not that bad because we can take advantage of this
+        to insert the user object in the :mod:`repoze.what` credentials dict.
+        
+        """
+        username = None
+        permissions = set()
+        groups = set([g.name for g in request.user.groups.all()])
+        
+        if request.user.is_authenticated():
+            username = request.user.username
+            permissions = set(request.user.get_all_permissions())
+        
+        new_environ = setup_request(
+            request.environ,
+            username,
+            None,
+            None,
+            self.acl_collection
+            ).environ
+        new_environ['repoze.what.credentials']['django_user'] = request.user
+        new_environ['repoze.what.credentials']['groups'] = groups
+        new_environ['repoze.what.credentials']['permissions'] = permissions
+        # Finally, let's update the Django environ:
+        request.environ = new_environ
+    
     def process_view(self, request, view_func, view_args, view_kwargs):
         """
         Check if authorization should be granted for this request or reject
@@ -102,14 +144,7 @@ class RepozeWhatMiddleware(object):
                           request.environ['PATH_INFO'])
             return
         
-        # Letting repoze.what set up the environment:
-        if request.user.is_authenticated():
-            username = request.user.username
-        else:
-            username = None
-        setup_request(request.environ, username, None, None, self.acl_collection)
-        
-        # Deciding authorization:
+        self._set_request_up(request)
         
         authz_decision = self.acl_collection.decide_authorization(request.environ,
                                                                   view_func)
