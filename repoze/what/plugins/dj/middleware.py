@@ -113,7 +113,6 @@ class RepozeWhatMiddleware(object):
             None,
             self.acl_collection
             ).environ
-        new_environ['repoze.what.credentials']['django_user'] = request.user
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
         # Finally, let's update the Django environ:
