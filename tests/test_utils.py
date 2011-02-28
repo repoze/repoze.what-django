@@ -157,6 +157,14 @@ class TestCanAccess(object):
     def tearDown(self):
         self.log_fixture.undo()
     
+    def test_none_args(self):
+        """
+        View arguments passed as None are turned into empty iterables
+        internally.
+        
+        """
+        ok_(can_access("/app1/blog", self.request, mock_view, None, None))
+    
     def test_no_authz_decision_made(self):
         """Authorization would be granted if no decision was made."""
         ok_(can_access("/app2/nothing", self.request))

@@ -261,6 +261,10 @@ def can_access(path, request, view_func=None, view_args=(),
         # The view is not passed; we have to find it!
         (view_func, view_args, view_kwargs) = _get_view_and_args(path, request)
     
+    # The arguments may be None:
+    view_args = view_args or ()
+    view_kwargs = view_kwargs or {}
+    
     # At this point ``path`` does exist, so it's safe to move on.
     
     authz_control = request.environ['repoze.what.global_control']
