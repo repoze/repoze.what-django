@@ -275,11 +275,22 @@ def can_access(path, request, view_func=None, view_args=(),
     # the request having a specific status as in real requests, which is
     # solved by running the appropriate Django middleware:
     for django_view_middleware in request.environ['repoze.what.dj_view_mw']:
-        django_view_middleware.process_view(
+        response = django_view_middleware.process_view(
             request,
             view_func,
             view_args,
-            view_kwargs)
+            view_kwargs,
+            )
+        
+        if response:
+            _LOGGER.debug(
+                "Authorization would be denied on ingress to %s at %s by the "
+                "middleware %s",
+                request.user,
+                path,
+                django_view_middleware.__class__.__name__,
+                )
+            return False
     
     # Finally, let's verify if authorization would be granted:
     decision = authz_control.decide_authorization(forged_request.environ,

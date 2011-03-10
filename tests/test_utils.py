@@ -179,6 +179,35 @@ class TestCanAccess(object):
         ok_('foo' in self.request.environ)
         ok_(self.request.environ['foo'], "bar")
     
+    def test_django_view_middleware_with_response(self):
+        """
+        Authorization would've been denied if one of the Django middleware
+        returns a view.
+        
+        Because that means the view wouldn't be reached.
+        
+        """
+        
+        class AddEnvironItem(object):
+            def process_view(self, request, view, *args, **kwargs):
+                return object()
+        
+        self.request.environ['repoze.what.dj_view_mw'] = [AddEnvironItem()]
+        
+        assert_false(can_access(
+            "/app1/blog",
+            self.request,
+            mock_view,
+            None,
+            None))
+        
+        eq_(
+            self.log_fixture.handler.messages['debug'][0],
+            "Authorization would be denied on ingress to %s at /app1/blog by "\
+                "the middleware AddEnvironItem" %
+                repr(self.request.user),
+            )
+    
     def test_no_authz_decision_made(self):
         """Authorization would be granted if no decision was made."""
         ok_(can_access("/app2/nothing", self.request))
