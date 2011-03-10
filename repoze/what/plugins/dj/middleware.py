@@ -126,6 +126,14 @@ class RepozeWhatMiddleware(object):
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
         new_environ['repoze.what.dj_view_mw'] = self.view_middleware
+        
+        # Port all the changes to the environment to the forget request:
+        forged_request = new_environ['repoze.what.clear_request']
+        forged_request.environ['repoze.what.credentials'] = \
+            new_environ['repoze.what.credentials']
+        forged_request.environ['repoze.what.dj_view_mw'] = \
+            new_environ['repoze.what.dj_view_mw']
+        
         # Finally, let's update the Django environ:
         request.environ = new_environ
     

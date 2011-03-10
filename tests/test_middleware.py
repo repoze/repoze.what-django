@@ -88,6 +88,17 @@ class TestEnvironSetup(object):
         self.middleware._set_request_up(request)
         ok_(isinstance(request.environ['repoze.what.clear_request'], MockRequest))
     
+    def test_forged_request_updated(self):
+        """The updated on the request are also applied to the forged request."""
+        request = Request({}, make_user("foo"))
+        self.middleware._set_request_up(request)
+        clear_request = request.environ['repoze.what.clear_request']
+        
+        eq_(request.environ['repoze.what.credentials'],
+            clear_request.environ['repoze.what.credentials'])
+        eq_(request.environ['repoze.what.dj_view_mw'],
+            clear_request.environ['repoze.what.dj_view_mw'])
+    
     #{ Credentials
     
     def test_anonymous_user(self):
