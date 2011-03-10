@@ -79,8 +79,9 @@ class RepozeWhatMiddleware(object):
         
         # Resolve all the Django middleware that will process views in forged
         # requests:
+        class_names = getattr(settings, "AUTHZ_FORGED_REQUEST_MIDDLEWARE", [])
         self.view_middleware = []
-        for mw_class_name in settings.AUTHZ_FORGED_REQUEST_MIDDLEWARE:
+        for mw_class_name in class_names:
             mw_class = resolve_object(mw_class_name)
             self.view_middleware.append(mw_class())
     
