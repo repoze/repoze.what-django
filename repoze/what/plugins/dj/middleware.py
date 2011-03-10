@@ -119,7 +119,8 @@ class RepozeWhatMiddleware(object):
             username,
             None,
             None,
-            self.acl_collection
+            self.acl_collection,
+            request.__class__,
             ).environ
         new_environ['repoze.what.credentials']['django_user'] = request.user
         new_environ['repoze.what.credentials']['groups'] = groups

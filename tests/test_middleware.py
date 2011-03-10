@@ -75,6 +75,19 @@ class TestEnvironSetup(object):
         eq_(len(self.middleware.view_middleware), 1)
         ok_(isinstance(self.middleware.view_middleware[0], AddEnvironItem))
     
+    def test_custom_request_class(self):
+        """
+        The forged request is an instance of the same class as the original
+        request.
+        
+        """
+        class MockRequest(Request):
+            pass
+        
+        request = MockRequest({}, make_user(None))
+        self.middleware._set_request_up(request)
+        ok_(isinstance(request.environ['repoze.what.clear_request'], MockRequest))
+    
     #{ Credentials
     
     def test_anonymous_user(self):
@@ -168,7 +181,7 @@ class TestAuthorizationEnforcement(object):
     def test_authorization_denied_without_custom_denial_handler(self):
         """
         When authorization is denied without a custom denial handler, the
-        default one must be user.
+        default one must be used.
         
         """
         environ = {'PATH_INFO': "/app2/secret"}

@@ -21,9 +21,9 @@ This module only contains mock objects and the like.
 
 import os
 
-from django.core.handlers.wsgi import WSGIRequest
 from repoze.what.predicates import Predicate
 
+from twod.wsgi.handler import TwodWSGIRequest
 
 # Setting the DJANGO_SETTINGS_MODULE variable so the tests can be run:
 os.environ['DJANGO_SETTINGS_MODULE'] = "tests.fixtures.sampledjango.settings"
@@ -47,20 +47,23 @@ def make_user(username, groups=(), permissions=()):
     return user
 
 
-class Request(WSGIRequest):
+class Request(TwodWSGIRequest):
     """
     Mock Django request.
     
     """
     
-    def __init__(self, environ, user):
+    def __init__(self, environ, user=None):
         # Including the missing items in the WSGI environ:
         full_environ = {
             'REQUEST_METHOD': "GET",
             'SERVER_NAME': "example.org",
             }
-        if user.is_authenticated():
+        
+        user = user or make_user(user)
+        if user and user.is_authenticated():
             full_environ['REMOTE_USER'] = user.username
+        
         full_environ.update(environ)
         # We're done, let's save it:
         super(Request, self).__init__(full_environ)

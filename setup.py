@@ -54,6 +54,7 @@ setup(name="repoze.what-django",
           "coverage",
           "nose",
           "Django >= 1.1",
+          "twod.wsgi >= 1.0",
           ],
       install_requires=[
           "repoze.what >= 1.1.0-dev",
