@@ -276,7 +276,7 @@ def can_access(path, request, view_func=None, view_args=(),
     # solved by running the appropriate Django middleware:
     for django_view_middleware in request.environ['repoze.what.dj_view_mw']:
         response = django_view_middleware.process_view(
-            request,
+            forged_request,
             view_func,
             view_args,
             view_kwargs,

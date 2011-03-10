@@ -169,15 +169,19 @@ class TestCanAccess(object):
         """Django middleware may be used to process the view."""
         
         class AddEnvironItem(object):
+            
+            def __init__(self):
+                self.reached = False
+            
             def process_view(self, request, view, *args, **kwargs):
-                request.environ['foo'] = "bar"
+                self.reached = True
         
-        self.request.environ['repoze.what.dj_view_mw'] = [AddEnvironItem()]
+        middleware = AddEnvironItem()
+        self.request.environ['repoze.what.dj_view_mw'] = [middleware]
         
         can_access("/app1/blog", self.request, mock_view, None, None)
         
-        ok_('foo' in self.request.environ)
-        ok_(self.request.environ['foo'], "bar")
+        ok_(middleware.reached)
     
     def test_django_view_middleware_with_response(self):
         """
