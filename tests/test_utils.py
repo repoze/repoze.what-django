@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # Copyright (c) 2009-2010, Gustavo Narea <me@gustavonarea.net>.
 # All Rights Reserved.
 #
@@ -164,6 +164,20 @@ class TestCanAccess(object):
         
         """
         ok_(can_access("/app1/blog", self.request, mock_view, None, None))
+    
+    def test_django_view_middleware(self):
+        """Django middleware may be used to process the view."""
+        
+        class AddEnvironItem(object):
+            def process_view(self, request, view, *args, **kwargs):
+                request.environ['foo'] = "bar"
+        
+        self.request.environ['repoze.what.dj_view_mw'] = [AddEnvironItem()]
+        
+        can_access("/app1/blog", self.request, mock_view, None, None)
+        
+        ok_('foo' in self.request.environ)
+        ok_(self.request.environ['foo'], "bar")
     
     def test_no_authz_decision_made(self):
         """Authorization would be granted if no decision was made."""

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # Copyright (c) 2009-2010, Gustavo Narea <me@gustavonarea.net>.
 # All Rights Reserved.
 #
@@ -76,6 +76,13 @@ class RepozeWhatMiddleware(object):
                          secured_apps)
         else:
             _LOGGER.warn("No application is secured")
+        
+        # Resolve all the Django middleware that will process views in forged
+        # requests:
+        self.view_middleware = []
+        for mw_class_name in settings.AUTHZ_FORGED_REQUEST_MIDDLEWARE:
+            mw_class = resolve_object(mw_class_name)
+            self.view_middleware.append(mw_class())
     
     def _set_request_up(self, request):
         """
@@ -116,6 +123,7 @@ class RepozeWhatMiddleware(object):
         new_environ['repoze.what.credentials']['django_user'] = request.user
         new_environ['repoze.what.credentials']['groups'] = groups
         new_environ['repoze.what.credentials']['permissions'] = permissions
+        new_environ['repoze.what.dj_view_mw'] = self.view_middleware
         # Finally, let's update the Django environ:
         request.environ = new_environ
     

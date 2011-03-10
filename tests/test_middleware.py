@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # Copyright (c) 2009-2010, Gustavo Narea <me@gustavonarea.net>.
 # All Rights Reserved.
 #
@@ -18,7 +18,7 @@ Tests for the Django middleware for :mod:`repoze.what`.
 
 """
 
-from nose.tools import eq_, ok_
+from nose.tools import assert_false, eq_, ok_
 from django.http import HttpResponse
 
 from repoze.what.plugins.dj import RepozeWhatMiddleware
@@ -56,14 +56,26 @@ class TestAuthzDiscovery(object):
             )
 
 
-class TestCredentials(object):
+class TestEnvironSetup(object):
     """
-    Tests to make sure the repoze.what credentials are set properly.
+    Tests to make sure the WSGI environment is set up properly for repoze.what.
     
     """
     
     def setUp(self):
         self.middleware = RepozeWhatMiddleware()
+    
+    def test_django_view_middleware(self):
+        """
+        Any Django middleware specified to be used to process forged requests
+        should be resolved.
+        
+        """
+        from tests.fixtures.sampledjango.middleware import AddEnvironItem
+        eq_(len(self.middleware.view_middleware), 1)
+        ok_(isinstance(self.middleware.view_middleware[0], AddEnvironItem))
+    
+    #{ Credentials
     
     def test_anonymous_user(self):
         """Anonymous users shouldn't have groups nor permissions."""
@@ -111,6 +123,8 @@ class TestCredentials(object):
         """The middleware's _set_request_up() shouldn't return a response."""
         request = Request({}, make_user(None))
         eq_(self.middleware._set_request_up(request), None)
+    
+    #}
 
 
 class TestAuthorizationEnforcement(object):

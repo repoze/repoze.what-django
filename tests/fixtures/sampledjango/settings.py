@@ -97,3 +97,7 @@ INSTALLED_APPS = (
 )
 
 GLOBAL_ACL_COLLECTION = "tests.fixtures.sampledjango.authz.control"
+
+AUTHZ_FORGED_REQUEST_MIDDLEWARE = [
+    'tests.fixtures.sampledjango.middleware.AddEnvironItem',
+    ]

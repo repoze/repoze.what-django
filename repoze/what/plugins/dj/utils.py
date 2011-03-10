@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # Copyright (c) 2009-2010, Gustavo Narea <me@gustavonarea.net>.
 # All Rights Reserved.
 #
@@ -270,6 +270,16 @@ def can_access(path, request, view_func=None, view_args=(),
     authz_control = request.environ['repoze.what.global_control']
     forged_request = forge_request(request.environ, path, view_args,
                                    view_kwargs)
+    
+    # While deciding authorization, the predicates evaluated may depend on
+    # the request having a specific status as in real requests, which is
+    # solved by running the appropriate Django middleware:
+    for django_view_middleware in request.environ['repoze.what.dj_view_mw']:
+        django_view_middleware.process_view(
+            request,
+            view_func,
+            view_args,
+            view_kwargs)
     
     # Finally, let's verify if authorization would be granted:
     decision = authz_control.decide_authorization(forged_request.environ,
