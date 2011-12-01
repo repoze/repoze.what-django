@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the BSD-like license at
@@ -19,6 +19,7 @@ This module only contains mock objects and the like.
 
 """
 
+from StringIO import StringIO
 import os
 
 from repoze.what.predicates import Predicate
@@ -58,6 +59,7 @@ class Request(TwodWSGIRequest):
         full_environ = {
             'REQUEST_METHOD': "GET",
             'SERVER_NAME': "example.org",
+            'wsgi.input': StringIO(""),
             }
         
         user = user or make_user(user)
