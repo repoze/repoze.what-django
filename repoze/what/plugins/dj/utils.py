@@ -21,7 +21,6 @@ In-view utilities for the :mod:`repoze.what` Django plugin.
 from logging import getLogger
 from functools import wraps
 
-from webob import Request
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver
 
@@ -207,6 +206,16 @@ def require(predicate, msg=None, denial_handler=None):
 #{ View access verifying functions
 
 
+class AccessDecision(object):
+    
+    def __init__(self, allow, ace_code):
+        self.allow = allow
+        self.ace_code = ace_code
+    
+    def __nonzero__(self):
+        return self.allow
+
+
 def can_access(path, request, view_func=None, view_args=(),
                view_kwargs={}):
     """
@@ -306,7 +315,8 @@ def can_access(path, request, view_func=None, view_args=(),
                       request.user, path)
         would_access = False
     
-    return would_access
+    ace_code = getattr(decision, "ace_code", None)
+    return AccessDecision(would_access, ace_code)
 
 
 #{ Internal stuff

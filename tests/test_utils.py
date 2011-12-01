@@ -236,6 +236,11 @@ class TestCanAccess(object):
             "Authorization would be denied on ingress to %s at /app1/admin" %
             repr(self.request.user))
     
+    def test_matching_ace_with_code(self):
+        decision = can_access("/app1/admin/system-status", self.request)
+        ok_(decision)
+        eq_(decision.ace_code, "unrestricted-area")
+    
     def test_non_existing_path(self):
         """
         Django's Resolver404 exception must be raised if the path doesn't exist.
