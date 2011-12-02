@@ -216,7 +216,7 @@ class TestAuthorizationEnforcement(object):
         environ = {'PATH_INFO': "/app1/admin"}
         request = Request(environ, make_user(None))
         response = self.middleware.process_view(request, object(), (), {})
-        eq_(response, "No! Get out!")
+        eq_(response, "No! Code is red")
         # Checking the logs:
         eq_(len(self.log_fixture.handler.messages['warning']), 1)
         eq_(self.log_fixture.handler.messages['warning'][0],

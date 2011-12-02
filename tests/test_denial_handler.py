@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the BSD-like license at
@@ -29,18 +29,10 @@ class TestDenialHandler(object):
     
     def test_user_is_anonymous(self):
         req = Request({}, make_user(None))
-        response = default_denial_handler(req, "You can't be here")
+        response = default_denial_handler(req, "foo")
         eq_(response.status_code, 401)
     
     def test_user_is_authenticated(self):
         req = Request({}, make_user("Foo"))
-        response = default_denial_handler(req, "What are you doing here?")
+        response = default_denial_handler(req, "foo")
         eq_(response.status_code, 403)
-        eq_(len(req.user.message_set.messages), 1)
-        eq_(req.user.message_set.messages[0], "What are you doing here?")
-    
-    def test_no_message_set(self):
-        """No message should be shown to the user if there's none set."""
-        req = Request({}, make_user(None))
-        response = default_denial_handler(req, None)
-        eq_(response.status_code, 401)

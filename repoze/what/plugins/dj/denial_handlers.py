@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2009-2010, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
+# Copyright (c) 2009-2011, 2degrees Limited <gustavonarea@2degreesnetwork.com>.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the BSD-like license at
@@ -22,15 +22,14 @@ from django.http import HttpResponse
 __all__ = ("default_denial_handler", )
 
 
-def default_denial_handler(request, denial_reason):
+def default_denial_handler(request, ace_code):
     """
-    Return a ``401``/``403`` response and explain the user why authorization
-    was denied.
+    Return a ``401``/``403`` response depending on whether the user is
+    authenticated.
     
     :param request: The Django request object
     :type request: :class:`django.http.HttpRequest`
-    :param denial_reason: The reason why authorization was denied
-    :type denial_reason: :class:`basestring` or ``None``
+    :param ace_code: The code associated to the matching ACE
     :return: The Django response
     :rtype: :class:`django.http.HttpResponse`
     
@@ -42,15 +41,9 @@ def default_denial_handler(request, denial_reason):
     to do it -- It's up to the authentication routine to challenge the user
     however it wants, even replacing the ``401`` status code with something else.
     
-    If a ``denial_reason`` is set, it will be shown to the user if he is
-    authenticated.
-    
     """
     if request.user.is_authenticated():
         status = 403
-        
-        if denial_reason:
-            request.user.message_set.create(message=denial_reason)
     else:
         status = 401
     

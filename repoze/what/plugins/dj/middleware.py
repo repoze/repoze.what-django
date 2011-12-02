@@ -187,7 +187,11 @@ class RepozeWhatMiddleware(object):
                           "one")
             authz_decision.denial_handler = default_denial_handler
         
-        return authz_decision.denial_handler(request, authz_decision.message)
+        denial_response = authz_decision.denial_handler(
+            request,
+            authz_decision.ace_code,
+            )
+        return denial_response
     
     def process_exception(self, request, exception):
         """
