@@ -1,0 +1,7 @@
+include README.txt
+include VERSION.txt
+include MANIFEST.in
+include ez_setup.py
+
+recursive-exclude docs/ *
+recursive-exclude tests/ *
