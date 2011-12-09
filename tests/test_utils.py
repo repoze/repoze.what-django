@@ -197,14 +197,10 @@ class TestCanAccess(object):
                 return object()
         
         self.request.environ['repoze.what.dj_view_mw'] = [AddEnvironItem()]
+        decision = can_access("/app1/blog", self.request, mock_view, None, None)
         
-        assert_false(can_access(
-            "/app1/blog",
-            self.request,
-            mock_view,
-            None,
-            None))
-        
+        assert_false(decision)
+        eq_(decision.ace_code, None)
         eq_(
             self.log_fixture.handler.messages['debug'][0],
             "Authorization would be denied on ingress to %s at /app1/blog by "\

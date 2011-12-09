@@ -299,7 +299,7 @@ def can_access(path, request, view_func=None, view_args=(),
                 path,
                 django_view_middleware.__class__.__name__,
                 )
-            return False
+            return AccessDecision(False, None)
     
     # Finally, let's verify if authorization would be granted:
     decision = authz_control.decide_authorization(forged_request.environ,
